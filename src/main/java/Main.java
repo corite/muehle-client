@@ -1,4 +1,3 @@
-import backend.entities.Coordinate;
 import frontend.Gui;
 import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;

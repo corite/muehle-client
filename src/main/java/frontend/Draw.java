@@ -1,8 +1,5 @@
 package frontend;
 
-import backend.entities.GamePhase;
-import backend.entities.StoneState;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -75,7 +72,7 @@ public class Draw extends JLabel {
         }
 
         //iterate through all Buttons
-
+/*
         for (int i=0; i<=23;i++){
             if (gui.getBtn(i) != null) {
 
@@ -158,6 +155,6 @@ public class Draw extends JLabel {
             return "Weiss";
         } else {
             return "Schwarz";
-        }
+        }*/
     }
 }

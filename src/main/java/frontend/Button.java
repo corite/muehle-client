@@ -1,7 +1,4 @@
-package frontend;
-
-import backend.entities.Coordinate;
-import backend.entities.StoneState;
+/*package frontend;
 
 import javax.swing.*;
 
@@ -20,3 +17,4 @@ public class Button extends JButton {
         this.coordinate = new Coordinate(x, y);
     }
 }
+*/

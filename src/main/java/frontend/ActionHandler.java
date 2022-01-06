@@ -1,10 +1,5 @@
-package frontend;
+/*package frontend;
 
-import backend.entities.GamePhase;
-import backend.entities.Player;
-import backend.entities.StoneState;
-import backend.exceptions.GameException;
-import backend.exceptions.IllegalMoveException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,4 +66,4 @@ public class ActionHandler implements ActionListener {
             }
         }
     }
-}
+}*/

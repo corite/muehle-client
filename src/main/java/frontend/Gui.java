@@ -1,63 +1,72 @@
 package frontend;
 
-import backend.entities.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
+
+import logic.entities.Player;
 
 public class Gui {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private JComboBox<Player> playerList;
     private Draw draw;
     private final JFrame frame;
     private final Button[]btn = new Button[24];
-    private Game game;
     private Button tmp = null;
+    private Player player;
+    private NetworkHandler networkHandler;
 
-    public Gui(){
+    public Gui() {
 
         //creating window and window settings
 
         frame = new JFrame("Muehle");
-        frame.setBounds(0,0,1000, 750);
+        frame.setBounds(0, 0, 1000, 750);
         frame.getContentPane().setBackground(Color.decode("#FDFD96"));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         frame.setResizable(false);
 
-        //get player name input through popup window, catch empty String or cancel Operation and initialize game
+        //get player name input through popup window, catch empty String or cancel Operation and initialize own Player Object
 
-        String name1 = "";
-        String name2 = "";
-        while (name1 == null || name1.equals("")){
-            name1 = JOptionPane.showInputDialog(frame,"Enter username for Player 1!");
+        try{
+            networkHandler = new NetworkHandler(new Socket("localhost", 77777));
+        } catch (IOException e) {
+            logger.debug("Host was not found");
         }
-        while (name2 == null || name2.equals("")){
-            name2 = JOptionPane.showInputDialog(frame,"Enter username for Player 2!");
+
+        String name = null;
+
+        while (name == null || name.equals("")) {
+            name = JOptionPane.showInputDialog(frame, "Enter username for Player 1!");
         }
-        double random = Math.random();
-        Player player1;
-        Player player2;
-        if (random < 0.5){
-            player1 = new Player(name1, StoneState.WHITE);
-            player2 = new Player(name2, StoneState.BLACK);
-        }else {
-            player1 = new Player(name1, StoneState.BLACK);
-            player2 = new Player(name2, StoneState.WHITE);
+
+        player = networkHandler.handleInitialAction(name);
+
+        ArrayList<Player> players = networkHandler.handleListPlayersAction(player);
+
+        playerList = new JComboBox<>();
+        for (Player player : players){
+            playerList.addItem(player);
         }
-        game = new Game(player1, player2);
+        playerList.addActionListener();
 
         //creating JLabel from draw class and draw settings
 
         draw = new Draw(this);
-        draw.setBounds(0,0,1000,750);
+        draw.setBounds(0, 0, 1000, 750);
         draw.setVisible(true);
         frame.add(draw);
         getDraw().repaint();
 
         //create buttons
-
+/*
         ArrayList<Coordinate> coordinates = game.getField().nodes().stream()
                 .map(Position::getCoordinate)
                 .sorted(((o1, o2) -> o1.getY() == o2.getY() ? Integer.compare(o1.getX(), o2.getX()) : -Integer.compare(o1.getY(), o2.getY())))
@@ -74,20 +83,21 @@ public class Gui {
             frame.add(btn[i]);
         }
         this.placeBtn();
+*/
     }
-
-    public Game getGame() {
-        return game;
-    }
-
+/*
     public Button getBtn(int i){
         return btn[i];
     }
-
+*/
     public Draw getDraw() {
         return draw;
     }
 
+    public JComboBox getComboBox() {
+        return playerList;
+    }
+/*
     public Button getTmp() {
         return tmp;
     }
@@ -123,5 +133,5 @@ public class Gui {
         btn[21].setBounds(50-20, 650-20, 40, 40);
         btn[22].setBounds(350-20, 650-20, 40, 40);
         btn[23].setBounds(650-20, 650-20, 40, 40);
-    }
+    }*/
 }
