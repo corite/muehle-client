@@ -1,5 +1,6 @@
 package frontend;
 
+import logic.entities.StoneState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +20,13 @@ public class Gui {
     private final JFrame frame;
     private final Button[]btn = new Button[24];
     private Button tmp = null;
-    private Player player;
+    private String name = null;
+    private Player player = null;
+    private ArrayList<Player> players = new ArrayList<Player>();
     private NetworkHandler networkHandler;
+    private Socket socket;
 
-    public Gui() {
+    public Gui() throws IOException {
 
         //creating window and window settings
 
@@ -35,27 +39,24 @@ public class Gui {
 
         //get player name input through popup window, catch empty String or cancel Operation and initialize own Player Object
 
-        try{
-            networkHandler = new NetworkHandler(new Socket("localhost", 77777));
-        } catch (IOException e) {
-            logger.debug("Host was not found");
-        }
-
-        String name = null;
+        socket = new Socket("localhost", 5056);
+        networkHandler = new NetworkHandler(socket, this);
+        Thread network = new Thread(networkHandler);
+        network.start();
 
         while (name == null || name.equals("")) {
-            name = JOptionPane.showInputDialog(frame, "Enter username for Player 1!");
+            setName(JOptionPane.showInputDialog(frame, "Enter username for Player 1!"));
         }
 
-        player = networkHandler.handleInitialAction(name);
-
-        ArrayList<Player> players = networkHandler.handleListPlayersAction(player);
+        while (getPlayer() == null){
+            networkHandler.setActionStatus(ActionStatus.INITIAL);
+        }
 
         playerList = new JComboBox<>();
         for (Player player : players){
             playerList.addItem(player);
         }
-        playerList.addActionListener();
+        playerList.addActionListener(new ComboBoxListener(this));
 
         //creating JLabel from draw class and draw settings
 
@@ -90,6 +91,27 @@ public class Gui {
         return btn[i];
     }
 */
+
+    public void setPlayers(ArrayList<Player> players) {
+        this.players = players;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     public Draw getDraw() {
         return draw;
     }
