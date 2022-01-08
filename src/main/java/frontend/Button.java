@@ -1,5 +1,6 @@
-/*package frontend;
+package frontend;
 
+import logic.entities.Coordinate;
 import javax.swing.*;
 
 public class Button extends JButton {
@@ -17,4 +18,3 @@ public class Button extends JButton {
         this.coordinate = new Coordinate(x, y);
     }
 }
-*/

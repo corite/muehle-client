@@ -1,69 +1,91 @@
-/*package frontend;
+package frontend;
 
+import logic.entities.Coordinate;
+import logic.entities.StoneState;
+import networking.entities.ActionType;
+import networking.entities.GameAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import logic.entities.Position;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ActionHandler implements ActionListener {
 
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Gui gui;
+    private final ObjectOutputStream outputStream;
 
-    public ActionHandler(Gui gui) {
+    public ActionHandler(Gui gui, ObjectOutputStream outputStream) {
         this.gui = gui;
+        this.outputStream = outputStream;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (gui.getGameResponse().isYourTurn()){
+            if (e.getSource() instanceof Button button) {
+                Draw draw = gui.getDraw();
 
-        if (e.getSource() instanceof Button) {
-            Button button = (Button) e.getSource();
-            Player player = gui.getGame().getNextPlayerToMove();
-            GamePhase phase = player.getPhase();
-            Draw draw = gui.getDraw();
+                if (gui.getGameResponse().getNextAction().equals(ActionType.TAKE)) {
 
-            if (gui.getGame().isNextOperationTake()) {
+                    //Sending Take Operation to Server if Action is Take
 
-                //try to perform take operation if the next operation is take and repaint JLabel properly
+                    try {
+                        outputStream.writeObject(new GameAction(gui.getPlayer(), ActionType.TAKE, null, button.getCoordinate()));
+                        outputStream.flush();
+                    } catch (IOException ex) {
+                        logger.debug("IO Error", ex);
+                    }
 
-                try {
-                    gui.getGame().takeStone(player, button.getCoordinate());
-                    draw.repaint();
-                    logger.debug("took Stone from coordinate " + button.getCoordinate());
-                } catch (IllegalMoveException ex) {
-                    logger.warn("Illegal Take", ex);
-                }
-            } else {
-                try {
+                } else if (gui.getGameResponse().getNextAction().equals(ActionType.PLACE)) {
 
-                    //try to perform different phase moves and repaint JLabel
+                    //Sending Place Operation to Server if Action is Place
 
-                    switch (phase) {
+                    try {
+                        outputStream.writeObject(new GameAction(gui.getPlayer(), ActionType.PLACE, null, button.getCoordinate()));
+                        outputStream.flush();
+                    } catch (IOException ex) {
+                        logger.debug("IO Error", ex);
+                    }
 
-                        case PLACE -> {
-                            gui.getGame().placeStone(player, button.getCoordinate());
-                            logger.debug("set stone at coordinate " + button.getCoordinate());
-                        }
+                } else if (gui.getGameResponse().getNextAction().equals(ActionType.MOVE)) {
 
-                        case MOVE, FLY -> {
-                            if (gui.getTmp() == null || !gui.getGame().getPositionAtCoordinate(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) {
-                                gui.setTmp(button);
-                                logger.debug("set tmp stone at coordinate " + button.getCoordinate());
-                            } else {
-                                gui.getGame().moveStone(player, gui.getTmp().getCoordinate(), button.getCoordinate());
-                                logger.debug("moved stone from coordinate " + gui.getTmp().getCoordinate() + " to coordinate " + button.getCoordinate());
-                                gui.setTmp(null);
-                            }
+                    //Sending Move Operation to Server if Action is Move
+
+                    if (gui.getTmp() == null || !getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) {
+                        gui.setTmp(button);
+                        logger.debug("set tmp stone at coordinate " + button.getCoordinate());
+
+                    } else {
+                        try {
+                            outputStream.writeObject(new GameAction(gui.getPlayer(), ActionType.MOVE, gui.getTmp().getCoordinate(), button.getCoordinate()));
+                            outputStream.flush();
+                            //todo dont forget to reset tmp Button in Response
+                        } catch (IOException ex) {
+                            logger.debug("IO Error", ex);
                         }
                     }
-                    draw.repaint();
-                } catch (GameException ex) {
-                    logger.warn("Illegal Move", ex);
+
+                } else {
+                    logger.debug("Error, unknown Action");
                 }
+                draw.repaint();
             }
+        } else {
+            logger.info("Not your turn");
         }
     }
-}*/
+
+    private Position getPosition(Coordinate coordinate){
+        return gui.getGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
+    }
+
+}
