@@ -17,5 +17,7 @@ public class ComboBoxListener implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         JComboBox comboBox = (JComboBox) e.getSource();
         Player player = (Player) comboBox.getSelectedItem();
+        //todo: @burned: können wir damit den SendRequestButton wegrationalisieren, sodass die anfrage direkt bei der auswahl gesendet wird?
+        // Wenn ja wäre das denke Ich cool.
     }
 }
