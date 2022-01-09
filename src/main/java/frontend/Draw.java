@@ -1,19 +1,13 @@
 package frontend;
 
-import logic.entities.StoneState;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class Draw extends JLabel {
-    private final Gui gui;
+    private Gui gui;
 
     public Draw(Gui gui) {
         this.gui = gui;
-    }
-
-    public Gui getGui() {
-        return gui;
     }
 
     @Override
@@ -78,73 +72,55 @@ public class Draw extends JLabel {
         }
 
         //iterate through all Buttons
-
+/*
         for (int i=0; i<=23;i++){
-            if (getGui().getBtn(i) != null) {
+            if (gui.getBtn(i) != null) {
 
                 //draw Stones on Button Coordinates
 
-                Color btnColor = getColor(getGui().getPosition(getGui().getBtn(i).getCoordinate()).getStoneState());
-                if (!getGui().getPosition(getGui().getBtn(i).getCoordinate()).getStoneState().equals(StoneState.NONE)) {
-                    g.setColor(btnColor);
-                    g.fillOval(getGui().getBtn(i).getX(), getGui().getBtn(i).getY(), 40, 40);
-                    g.setColor(getOtherColor(btnColor));
-                    g.drawOval(getGui().getBtn(i).getX() + 5, getGui().getBtn(i).getY() + 5, 30, 30);
-                    g.drawOval(getGui().getBtn(i).getX() + 10, getGui().getBtn(i).getY() + 10, 20, 20);
-                    if (Color.BLACK.equals(btnColor)) {
-                        g.setColor(Color.BLACK);
-                    }
+                if (gui.getGame().getPositionAtCoordinate(gui.getBtn(i).getCoordinate()).getStoneState().equals(StoneState.BLACK)) {
+                    g.setColor(Color.BLACK);
+                    g.fillOval(gui.getBtn(i).getX(), gui.getBtn(i).getY(), 40, 40);
+                    g.setColor(Color.WHITE);
+                    g.drawOval(gui.getBtn(i).getX()+5, gui.getBtn(i).getY()+5, 30, 30);
+                    g.drawOval(gui.getBtn(i).getX()+10, gui.getBtn(i).getY()+10, 20, 20);
+                    g.setColor(Color.BLACK);
+                } else if (gui.getGame().getPositionAtCoordinate(gui.getBtn(i).getCoordinate()).getStoneState().equals(StoneState.WHITE)) {
+                    g.setColor(Color.WHITE);
+                    g.fillOval(gui.getBtn(i).getX(), gui.getBtn(i).getY(), 40, 40);
+                    g.setColor(Color.BLACK);
+                    g.drawOval(gui.getBtn(i).getX()+5, gui.getBtn(i).getY()+5, 30, 30);
+                    g.drawOval(gui.getBtn(i).getX()+10, gui.getBtn(i).getY()+10, 20, 20);
                 }
-                //todo:the thing above is supposed to be a shortened Version of the if else below, but I'm not 100% sure that it behaves exactly the same
-                /*
-                if (getGui().getGame().getPositionAtCoordinate(getGui().getBtn(i).getCoordinate()).getStoneState().equals(StoneState.BLACK)) {
-                    g.setColor(Color.BLACK);
-                    g.fillOval(getGui().getBtn(i).getX(), getGui().getBtn(i).getY(), 40, 40);
-                    g.setColor(Color.WHITE);
-                    g.drawOval(getGui().getBtn(i).getX()+5, getGui().getBtn(i).getY()+5, 30, 30);
-                    g.drawOval(getGui().getBtn(i).getX()+10, getGui().getBtn(i).getY()+10, 20, 20);
-                    g.setColor(Color.BLACK);
-                } else if (getGui().getGame().getPositionAtCoordinate(getGui().getBtn(i).getCoordinate()).getStoneState().equals(StoneState.WHITE)) {
-                    g.setColor(Color.WHITE);
-                    g.fillOval(getGui().getBtn(i).getX(), getGui().getBtn(i).getY(), 40, 40);
-                    g.setColor(Color.BLACK);
-                    g.drawOval(getGui().getBtn(i).getX()+5, getGui().getBtn(i).getY()+5, 30, 30);
-                    g.drawOval(getGui().getBtn(i).getX()+10, getGui().getBtn(i).getY()+10, 20, 20);
-                }*/
 
                 //draw red circle around selected Button during move/fly phase
 
-                if (getGui().getTmp() != null){
+                if (gui.getTmp() != null){
                     g.setColor(Color.RED);
-                    g.drawOval(getGui().getTmp().getX(), getGui().getTmp().getY(), 40, 40);
+                    g.drawOval(gui.getTmp().getX(), gui.getTmp().getY(), 40, 40);
                     g.setColor(Color.BLACK);
                 }
             }
         }
 
         //draw String of moving/winning player
-        //todo: implement winning/losing properly in server and shared
-        //todo: send nextPlayerToMove in GameResponse
 
-        //todo: @burned: das folgende auskommentierte hab Ich mir noch nicht weiter angeschaut, da das glaube Ich noch vorher
-        // die oben genannten Änderungen vorrraussetzt
-        /*
         g.setFont(g.getFont().deriveFont(g.getFont().getSize() * 1.4F));
-        if (getGui().getGame().getPlayer1().getPhase().equals(GamePhase.WON)) {
-            g.drawString(getResizedString(getGui().getGame().getPlayer1().getName()) + " hat gewonnen.", 700, 50);
+        if (gui.getGame().getPlayer1().getPhase().equals(GamePhase.WON)) {
+            g.drawString(getResizedString(gui.getGame().getPlayer1().getName()) + " hat gewonnen.", 700, 50);
         }
-        else if (getGui().getGame().getPlayer2().getPhase().equals(GamePhase.WON)) {
-            g.drawString(getResizedString(getGui().getGame().getPlayer2().getName()) + " hat gewonnen.", 700, 50);
+        else if (gui.getGame().getPlayer2().getPhase().equals(GamePhase.WON)) {
+            g.drawString(getResizedString(gui.getGame().getPlayer2().getName()) + " hat gewonnen.", 700, 50);
         }
         else {
-            g.drawString(getResizedString(getGui().getGame().getNextPlayerToMove().getName()) + " ist am Zug.", 700, 50);
+            g.drawString(getResizedString(gui.getGame().getNextPlayerToMove().getName()) + " ist am Zug.", 700, 50);
         }
-        g.drawString(getResizedString(getGui().getGame().getPlayer1().getName()) + " spielt " + getColorAsString(getGui().getGame().getPlayer1().getColor()) + ".", 700, 100);
-        g.drawString(getResizedString(getGui().getGame().getPlayer2().getName()) + " spielt " + getColorAsString(getGui().getGame().getPlayer2().getColor()) + ".", 700, 125);
+        g.drawString(getResizedString(gui.getGame().getPlayer1().getName()) + " spielt " + getColorAsString(gui.getGame().getPlayer1().getColor()) + ".", 700, 100);
+        g.drawString(getResizedString(gui.getGame().getPlayer2().getName()) + " spielt " + getColorAsString(gui.getGame().getPlayer2().getColor()) + ".", 700, 125);
 
         //draw remaining Stones of the players
 
-        for (int i=0; i<=8-getGui().getGame().getPlayer1().getPlacedStones(); i++){
+        for (int i=0; i<=8-gui.getGame().getPlayer1().getPlacedStones(); i++){
             g.setColor(Color.WHITE);
             g.fillOval(700, 600-i*50,40,40);
             g.setColor(Color.BLACK);
@@ -152,14 +128,14 @@ public class Draw extends JLabel {
             g.drawOval(700+10, 600-i*50+10, 20, 20);
         }
 
-        for (int i=0; i<=8-getGui().getGame().getPlayer2().getPlacedStones(); i++){
+        for (int i=0; i<=8-gui.getGame().getPlayer2().getPlacedStones(); i++){
             g.setColor(Color.BLACK);
             g.fillOval(750, 600-i*50,40,40);
             g.setColor(Color.WHITE);
             g.drawOval(750+5, 600-i*50+5, 30, 30);
             g.drawOval(750+10, 600-i*50+10, 20, 20);
             g.setColor(Color.BLACK);
-        }*/
+        }
     }
 
     private String getResizedString(String a) {
@@ -175,22 +151,10 @@ public class Draw extends JLabel {
     }
 
     private String getColorAsString(StoneState s) {
-        if (StoneState.WHITE.equals(s)) {
+        if (s.equals(StoneState.WHITE)) {
             return "Weiss";
-        } else if (StoneState.BLACK.equals(s)){
+        } else {
             return "Schwarz";
-        } else throw new IllegalArgumentException("unknown StoneState");
-    }
-
-    private Color getOtherColor(Color color) {
-        return Color.WHITE.equals(color) ? Color.BLACK : Color.WHITE;
-    }
-
-    private Color getColor(StoneState stoneState) {
-        if (StoneState.WHITE.equals(stoneState)) {
-            return Color.WHITE;
-        } else if (StoneState.BLACK.equals(stoneState)) {
-            return Color.BLACK;
-        } else throw new IllegalArgumentException("unknown StoneState");
+        }*/
     }
 }
