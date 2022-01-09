@@ -1,6 +1,7 @@
 package frontend;
 
-import logic.entities.StoneState;
+import logic.entities.Coordinate;
+import logic.entities.Position;
 import networking.SocketReader;
 import networking.SocketWriter;
 import networking.entities.*;
@@ -19,12 +20,16 @@ import logic.entities.Player;
 public class Gui {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
     private final JComboBox<Player> playerList = new JComboBox<>();
     private final Draw draw = new Draw(this);
     private final JFrame frame = new JFrame("Muehle");
-    private final Button[]btn = new Button[24];
+    private final Button[] buttons = new Button[24];
     private Button tmp = null;
+
     private Player player = null;
+    private GameResponse lastGameResponse;
+
     private OutputStream outputStream;
     private final Object writerLock = new Object();
 
@@ -70,6 +75,14 @@ public class Gui {
 
     }
 
+    public GameResponse getLastGameResponse() {
+        return lastGameResponse;
+    }
+
+    public void setLastGameResponse(GameResponse lastGameResponse) {
+        this.lastGameResponse = lastGameResponse;
+    }
+
     public boolean isListPlayersScreenEnabled() {
         return isListPlayersScreenEnabled;
     }
@@ -86,8 +99,8 @@ public class Gui {
         return frame;
     }
 
-    public Button[] getBtn() {
-        return btn;
+    public Button[] getButtons() {
+        return buttons;
     }
 
     public OutputStream getOutputStream() {
@@ -103,7 +116,7 @@ public class Gui {
     }
 
     public Button getBtn(int i){
-        return btn[i];
+        return buttons[i];
     }
 
     public Player getPlayer() {
@@ -134,59 +147,56 @@ public class Gui {
     //Button placement
 
     private void placeBtn() {
-        btn[0].setBounds(50-20, 50-20, 40, 40);
-        btn[1].setBounds(350-20, 50-20, 40, 40);
-        btn[2].setBounds(650-20, 50-20, 40, 40);
-        btn[3].setBounds(150-20, 150-20, 40, 40);
-        btn[4].setBounds(350-20, 150-20, 40, 40);
-        btn[5].setBounds(550-20, 150-20, 40, 40);
-        btn[6].setBounds(250-20, 250-20, 40, 40);
-        btn[7].setBounds(350-20, 250-20, 40, 40);
-        btn[8].setBounds(450-20, 250-20, 40, 40);
-        btn[9].setBounds(50-20, 350-20, 40, 40);
-        btn[10].setBounds(150-20, 350-20, 40, 40);
-        btn[11].setBounds(250-20, 350-20, 40, 40);
-        btn[12].setBounds(450-20, 350-20, 40, 40);
-        btn[13].setBounds(550-20, 350-20, 40, 40);
-        btn[14].setBounds(650-20, 350-20, 40, 40);
-        btn[15].setBounds(250-20, 450-20, 40, 40);
-        btn[16].setBounds(350-20, 450-20, 40, 40);
-        btn[17].setBounds(450-20, 450-20, 40, 40);
-        btn[18].setBounds(150-20, 550-20, 40, 40);
-        btn[19].setBounds(350-20, 550-20, 40, 40);
-        btn[20].setBounds(550-20, 550-20, 40, 40);
-        btn[21].setBounds(50-20, 650-20, 40, 40);
-        btn[22].setBounds(350-20, 650-20, 40, 40);
-        btn[23].setBounds(650-20, 650-20, 40, 40);
+        getButtons()[0].setBounds(50-20, 50-20, 40, 40);
+        getButtons()[1].setBounds(350-20, 50-20, 40, 40);
+        getButtons()[2].setBounds(650-20, 50-20, 40, 40);
+        getButtons()[3].setBounds(150-20, 150-20, 40, 40);
+        getButtons()[4].setBounds(350-20, 150-20, 40, 40);
+        getButtons()[5].setBounds(550-20, 150-20, 40, 40);
+        getButtons()[6].setBounds(250-20, 250-20, 40, 40);
+        getButtons()[7].setBounds(350-20, 250-20, 40, 40);
+        getButtons()[8].setBounds(450-20, 250-20, 40, 40);
+        getButtons()[9].setBounds(50-20, 350-20, 40, 40);
+        getButtons()[10].setBounds(150-20, 350-20, 40, 40);
+        getButtons()[11].setBounds(250-20, 350-20, 40, 40);
+        getButtons()[12].setBounds(450-20, 350-20, 40, 40);
+        getButtons()[13].setBounds(550-20, 350-20, 40, 40);
+        getButtons()[14].setBounds(650-20, 350-20, 40, 40);
+        getButtons()[15].setBounds(250-20, 450-20, 40, 40);
+        getButtons()[16].setBounds(350-20, 450-20, 40, 40);
+        getButtons()[17].setBounds(450-20, 450-20, 40, 40);
+        getButtons()[18].setBounds(150-20, 550-20, 40, 40);
+        getButtons()[19].setBounds(350-20, 550-20, 40, 40);
+        getButtons()[20].setBounds(550-20, 550-20, 40, 40);
+        getButtons()[21].setBounds(50-20, 650-20, 40, 40);
+        getButtons()[22].setBounds(350-20, 650-20, 40, 40);
+        getButtons()[23].setBounds(650-20, 650-20, 40, 40);
     }
 
     private void createFrame(){
-        frame.setBounds(0, 0, 1000, 750);
-        frame.setLayout(new FlowLayout());
-        frame.getContentPane().setBackground(Color.decode("#FDFD96"));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-        frame.setResizable(false);
+        getFrame().setBounds(0, 0, 1000, 750);
+        getFrame().setLayout(new FlowLayout());
+        getFrame().getContentPane().setBackground(Color.decode("#FDFD96"));
+        getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getFrame().setVisible(true);
+        getFrame().setResizable(false);
     }
 
     private void createLabel(){
-        draw.setBounds(0, 0, 1000, 750);
-        draw.setVisible(true);
+        getDraw().setBounds(0, 0, 1000, 750);
+        getDraw().setVisible(true);
         getDraw().repaint();
     }
 
     private void createButtons(int i){
-        btn[i].setVisible(true);
-        try {
-            //todo: change output stream
-            btn[i].addActionListener(new ActionHandler(this, new ObjectOutputStream(getOutputStream())));
-        } catch (IOException e) {
-            logger.debug("IO Error", e);
-        }
-        btn[i].setFocusPainted(false);
-        btn[i].setContentAreaFilled(false);
-        btn[i].setBorder(null);
-        frame.add(btn[i]);
+        getButtons()[i].setVisible(true);
+
+        getButtons()[i].addActionListener(new ActionHandler(this));
+
+        getButtons()[i].setFocusPainted(false);
+        getButtons()[i].setContentAreaFilled(false);
+        getButtons()[i].setBorder(null);
+        getFrame().add(getButtons()[i]);
     }
 
     public synchronized void renderListPlayersResponse(ListPlayersResponse response){
@@ -214,9 +224,9 @@ public class Gui {
             JButton sendRequestButton = new JButton("Send request");
             sendRequestButton.setPreferredSize(new Dimension(200,50));
             sendRequestButton.addActionListener(e -> {
-                if (playerList.getSelectedItem() == null){
+                if (getPlayerList().getSelectedItem() == null){
                     synchronized (this) {
-                        JOptionPane.showMessageDialog(frame, "Bitte Wähle einen Spieler aus der Liste aus");
+                        JOptionPane.showMessageDialog(getFrame(), "Bitte Wähle einen Spieler aus der Liste aus");
                     }
                 } else {
                     ConnectAction connectAction = new ConnectAction(getPlayer(), (Player) getPlayerList().getSelectedItem());
@@ -227,15 +237,15 @@ public class Gui {
             getFrame().add(sendRequestButton);
             setListPlayersScreenEnabled(true);
         }
-        getPlayerList().removeAll();
+
+
+        getPlayerList().removeAllItems();
         if (response.getPlayers().isEmpty()){
-            JOptionPane.showMessageDialog(frame, "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in später zu aktualisieren.");
-            getPlayerList().addItem(null);//todo: figure out if this null is ok
-        }else{
+            JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in später zu aktualisieren.");
+            getPlayerList().addItem(null);
+        } else {
             for (Player player : response.getPlayers()){
-                System.out.println(player);
                 getPlayerList().addItem(player);
-                draw.repaint();
             }
         }
     }
@@ -253,12 +263,22 @@ public class Gui {
         String name = null;
 
         while (name == null || name.equals("")) {
-            name = JOptionPane.showInputDialog(frame, "Enter username for Player 1!");
+            name = JOptionPane.showInputDialog(getFrame(), "Enter username for Player 1!");
         }
         InitialAction initialAction = new InitialAction(name);
 
         //send message in new thread, this thread also handles the synchronisation of the output stream
         Thread socketWriter = new Thread(new SocketWriter(getWriterLock(),initialAction,getOutputStream()));
         socketWriter.start();
+    }
+
+    public synchronized void renderGameResponse(GameResponse response) {
+        logger.debug("rendering GameResponse");
+
+        //todo: do shit
+    }
+
+    public Position getPosition(Coordinate coordinate){
+        return getLastGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
     }
 }

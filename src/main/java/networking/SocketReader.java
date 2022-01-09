@@ -58,7 +58,7 @@ public class SocketReader implements Runnable {
     }
 
     public void handleInitialResponse(InitialResponse response) {
-        gui.setPlayer(response.getSelf());
+        getGui().setPlayer(response.getSelf());
 
 
         ListPlayersAction listPlayersAction = new ListPlayersAction(response.getSelf());
@@ -67,10 +67,12 @@ public class SocketReader implements Runnable {
     }
 
     public void handleListPlayersResponse(ListPlayersResponse response) {
-        gui.renderListPlayersResponse(response);
+        getGui().renderListPlayersResponse(response);
     }
 
     public void handleGameResponse(GameResponse response) {
+        getGui().setLastGameResponse(response);
 
+        getGui().renderGameResponse(response);
     }
 }
