@@ -2,6 +2,7 @@ package frontend;
 
 import logic.entities.Coordinate;
 import logic.entities.StoneState;
+import networking.SocketWriter;
 import networking.entities.ActionType;
 import networking.entities.GameAction;
 import org.slf4j.Logger;
@@ -10,82 +11,72 @@ import org.slf4j.LoggerFactory;
 import logic.entities.Position;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 
 public class ActionHandler implements ActionListener {
 
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Gui gui;
-    private final ObjectOutputStream outputStream;
 
-    public ActionHandler(Gui gui, ObjectOutputStream outputStream) {
+    public ActionHandler(Gui gui) {
         this.gui = gui;
-        this.outputStream = outputStream;
+    }
+
+    public Gui getGui() {
+        return gui;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (gui.getGameResponse().isYourTurn()){
+        if (getGui().getLastGameResponse().isYourTurn()){
             if (e.getSource() instanceof Button button) {
-                Draw draw = gui.getDraw();
+                Draw draw = getGui().getDraw();
 
-                if (gui.getGameResponse().getNextAction().equals(ActionType.TAKE)) {
+                if (getGui().getLastGameResponse().getNextAction().equals(ActionType.TAKE)) {
 
                     //Sending Take Operation to Server if Action is Take
+                    GameAction gameAction = new GameAction(getGui().getPlayer(), ActionType.TAKE, button.getCoordinate());
+                    Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), gameAction,getGui().getOutputStream()));
+                    socketWriter.start();
 
-                    try {
-                        outputStream.writeObject(new GameAction(gui.getPlayer(), ActionType.TAKE, null, button.getCoordinate()));
-                        outputStream.flush();
-                    } catch (IOException ex) {
-                        logger.debug("IO Error", ex);
-                    }
-
-                } else if (gui.getGameResponse().getNextAction().equals(ActionType.PLACE)) {
+                } else if (getGui().getLastGameResponse().getNextAction().equals(ActionType.PLACE)) {
 
                     //Sending Place Operation to Server if Action is Place
 
-                    try {
-                        outputStream.writeObject(new GameAction(gui.getPlayer(), ActionType.PLACE, null, button.getCoordinate()));
-                        outputStream.flush();
-                    } catch (IOException ex) {
-                        logger.debug("IO Error", ex);
-                    }
+                    GameAction gameAction = new GameAction(getGui().getPlayer(), ActionType.PLACE, button.getCoordinate());
+                    Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), gameAction,getGui().getOutputStream()));
+                    socketWriter.start();
 
-                } else if (gui.getGameResponse().getNextAction().equals(ActionType.MOVE)) {
+                } else if (getGui().getLastGameResponse().getNextAction().equals(ActionType.MOVE)) {
 
                     //Sending Move Operation to Server if Action is Move
 
-                    if (gui.getTmp() == null || !getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) {
-                        gui.setTmp(button);
+                    if (getGui().getTmp() == null && !getGui().getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) {
+                        //todo: change stuff in server and shared so that GameResponse includes nextPlayerToMove, not boolean is your turn
+                        //todo: because the client has to know which color he is
+
+                        getGui().setTmp(button);
                         logger.debug("set tmp stone at coordinate " + button.getCoordinate());
 
                     } else {
-                        try {
-                            outputStream.writeObject(new GameAction(gui.getPlayer(), ActionType.MOVE, gui.getTmp().getCoordinate(), button.getCoordinate()));
-                            outputStream.flush();
-                            //todo dont forget to reset tmp Button in Response
-                        } catch (IOException ex) {
-                            logger.debug("IO Error", ex);
-                        }
+                        GameAction gameAction = new GameAction(getGui().getPlayer(), ActionType.MOVE, getGui().getTmp().getCoordinate(), button.getCoordinate());
+                        Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), gameAction,getGui().getOutputStream()));
+                        socketWriter.start();
+
+                        getGui().setTmp(null);
                     }
 
                 } else {
-                    logger.debug("Error, unknown Action");
+                    logger.error("unknown Action '{}'",getGui().getLastGameResponse().getNextAction());
                 }
                 draw.repaint();
             }
         } else {
-            logger.info("Not your turn");
+            logger.warn("not your turn");
         }
     }
 
-    private Position getPosition(Coordinate coordinate){
-        return gui.getGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
-    }
+
 
 }
