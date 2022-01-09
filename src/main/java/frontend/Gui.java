@@ -2,6 +2,7 @@ package frontend;
 
 import logic.entities.Position;
 import logic.entities.Coordinate;
+import networking.entities.ConnectAction;
 import networking.entities.GameResponse;
 import networking.entities.InitialAction;
 import networking.entities.ListPlayersAction;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import logic.entities.Player;
@@ -31,7 +33,7 @@ public class Gui {
     private GameResponse gameResponse;
     private ArrayList<Player> players = new ArrayList<>();
 
-    public Gui() throws IOException {
+    public Gui() throws IOException, InterruptedException {
 
         //creating window and window settings
 
@@ -71,6 +73,25 @@ public class Gui {
             playerList.addItem(player);
         }
         playerList.addActionListener(new ComboBoxListener(this));
+
+        AtomicReference<Boolean> sentAction = new AtomicReference<>(false);
+        JButton confirm = new JButton("Send request");
+        confirm.addActionListener(e -> {
+            try {
+                outputStream.writeObject(new ConnectAction(player, (Player) playerList.getSelectedItem()));
+                outputStream.flush();
+                frame.remove(confirm);
+                frame.remove(playerList);
+                sentAction.set(true);
+            } catch (IOException ex) {
+                logger.debug("IO Error", ex);
+            }
+        });
+        frame.add(confirm);
+
+        while(!sentAction.get()){
+            
+        }
 
         //creating JLabel from draw class and draw settings
 
@@ -169,7 +190,6 @@ public class Gui {
     private void createLabel(){
         draw.setBounds(0, 0, 1000, 750);
         draw.setVisible(true);
-        frame.add(draw);
         getDraw().repaint();
     }
 
