@@ -2,17 +2,19 @@ package frontend;
 
 import logic.entities.Position;
 import logic.entities.Coordinate;
-import networking.entities.ConnectAction;
-import networking.entities.GameResponse;
-import networking.entities.InitialAction;
-import networking.entities.ListPlayersAction;
+import logic.entities.StoneState;
+import networking.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,27 +25,27 @@ import logic.entities.Player;
 public class Gui {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final JComboBox<Player> playerList;
-    private final Draw draw;
-    private final JFrame frame;
+    private final JComboBox<Player> playerList = new JComboBox<>();
+    private final Draw draw = new Draw(this);
+    private final JFrame frame = new JFrame("Muehle");
     private final Button[]btn = new Button[24];
     private Button tmp = null;
     private Player player = null;
     private Socket socket;
     private GameResponse gameResponse;
+    private final NetworkHandler networkHandler;
     private ArrayList<Player> players = new ArrayList<>();
 
-    public Gui() throws IOException, InterruptedException {
+    public Gui() throws IOException {
 
         //creating window and window settings
 
-        frame = new JFrame("Muehle");
         this.createFrame();
 
         //create Socket and Thread for NetworkHandler class
 
         socket = new Socket("localhost", 5056);
-        NetworkHandler networkHandler = new NetworkHandler(socket, this);
+        networkHandler = new NetworkHandler(socket, this);
         Thread network = new Thread(networkHandler);
         network.start();
 
@@ -56,62 +58,66 @@ public class Gui {
         }
 
         //send input name to the Server to receive Player Object
+        synchronized (this){
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            outputStream.writeObject(new InitialAction(name));
+            outputStream.flush();
 
-        ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-        outputStream.writeObject(new InitialAction(name));
-        outputStream.flush();
+            //put Players in Combo Box, to choose one to play against
 
-        //send ListPlayersAction to Server to receive a List of other players to play with
+            JButton refreshList = new JButton("Aktualisiere Liste");
+            refreshList.addActionListener(e -> {
+                try {
+                    outputStream.writeObject(new ListPlayersAction(player));
+                    outputStream.flush();
+                } catch (IOException ex) {
+                    logger.debug("IO Error", ex);
+                }
+            });
+            refreshList.setPreferredSize(new Dimension(200, 50));
+            frame.add(refreshList);
 
-        outputStream.writeObject(new ListPlayersAction(player));
-        outputStream.flush();
+            playerList.addActionListener(new ComboBoxListener(this));
+            playerList.setPreferredSize(new Dimension(300,50));
+            frame.add(playerList);
 
-        //put Players in Combo Box, to choose one to play against
+            JButton confirm = new JButton("Send request");
+            confirm.setPreferredSize(new Dimension(200,50));
+            confirm.addActionListener(e -> {
+                if (playerList.getSelectedItem() == null){
+                    JOptionPane.showMessageDialog(frame,"Bitte Wähle einen Spieler aus der Liste aus");
+                }else{
+                    try {
+                        outputStream.writeObject(new ConnectAction(player, (Player) playerList.getSelectedItem()));
+                        outputStream.flush();
+                        frame.remove(confirm);
+                        frame.remove(playerList);
+                        frame.remove(refreshList);
+                    } catch (IOException ex) {
+                        logger.debug("IO Error", ex);
+                    }
+                }
+            });
+            frame.add(confirm);
 
-        playerList = new JComboBox<>();
-        for (Player player : players){
-            playerList.addItem(player);
-        }
-        playerList.addActionListener(new ComboBoxListener(this));
+            //creating JLabel from draw class and draw settings
 
-        AtomicReference<Boolean> sentAction = new AtomicReference<>(false);
-        JButton confirm = new JButton("Send request");
-        confirm.addActionListener(e -> {
-            try {
-                outputStream.writeObject(new ConnectAction(player, (Player) playerList.getSelectedItem()));
-                outputStream.flush();
-                frame.remove(confirm);
-                frame.remove(playerList);
-                sentAction.set(true);
-            } catch (IOException ex) {
-                logger.debug("IO Error", ex);
+/*            createLabel();
+
+            //create buttons
+
+            ArrayList<Coordinate> coordinates = gameResponse.getGameField().stream()
+                    .map(Position::getCoordinate)
+                    .sorted(((o1, o2) -> o1.getY() == o2.getY() ? Integer.compare(o1.getX(), o2.getX()) : -Integer.compare(o1.getY(), o2.getY())))
+                    //sorts the collection so that the nodes can be traversed row by row from top to bottom
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            for (int i=0; i< btn.length; i++){
+                btn[i] = new Button(coordinates.get(i));
+                createButtons(i);
             }
-        });
-        frame.add(confirm);
-
-        while(!sentAction.get()){
-            
+            this.placeBtn();*/
         }
-
-        //creating JLabel from draw class and draw settings
-
-        draw = new Draw(this);
-        createLabel();
-
-        //create buttons
-
-        ArrayList<Coordinate> coordinates = gameResponse.getGameField().stream()
-                .map(Position::getCoordinate)
-                .sorted(((o1, o2) -> o1.getY() == o2.getY() ? Integer.compare(o1.getX(), o2.getX()) : -Integer.compare(o1.getY(), o2.getY())))
-                //sorts the collection so that the nodes can be traversed row by row from top to bottom
-                .collect(Collectors.toCollection(ArrayList::new));
-
-        for (int i=0; i< btn.length; i++){
-            btn[i] = new Button(coordinates.get(i));
-            createButtons(i);
-        }
-        this.placeBtn();
-
     }
 
     public Button getBtn(int i){
@@ -181,6 +187,7 @@ public class Gui {
 
     private void createFrame(){
         frame.setBounds(0, 0, 1000, 750);
+        frame.setLayout(new FlowLayout());
         frame.getContentPane().setBackground(Color.decode("#FDFD96"));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -206,5 +213,15 @@ public class Gui {
         frame.add(btn[i]);
     }
 
-
+    public void handleListPlayers(ListPlayersResponse response){
+        playerList.removeAll();
+        if (response.getPlayers().isEmpty()){
+            JOptionPane.showMessageDialog(frame, "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in später zu aktualisieren.");
+            playerList.addItem(new Player("", 0, StoneState.NONE, OutputStream.nullOutputStream()));
+        }else{
+            for (Player player : response.getPlayers()){
+                playerList.addItem(player);
+            }
+        }
+    }
 }

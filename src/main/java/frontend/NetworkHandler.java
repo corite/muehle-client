@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class NetworkHandler implements Runnable {
@@ -49,11 +50,22 @@ public class NetworkHandler implements Runnable {
     }
 
     public void handleInitialAction(InitialResponse response) {
-        gui.setPlayer(response.getSelf());
+        synchronized (gui){
+            try {
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                outputStream.writeObject(new ListPlayersAction(response.getSelf()));
+                outputStream.flush();
+            } catch (IOException e) {
+                logger.debug("IO error", e);
+            }
+            gui.setPlayer(response.getSelf());
+        }
     }
 
     public void handleListPlayersAction(ListPlayersResponse response){
-        gui.setPlayers(response.getPlayers());
+        synchronized (gui){
+            gui.handleListPlayers(response);
+        }
     }
 
     public void handleGameAction(GameResponse response){
