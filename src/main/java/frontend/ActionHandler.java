@@ -30,7 +30,7 @@ public class ActionHandler implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (gui.getGameResponse().isYourTurn()){
+/*        if (gui.getGameResponse().isYourTurn()){
             if (e.getSource() instanceof Button button) {
                 Draw draw = gui.getDraw();
 
@@ -81,11 +81,11 @@ public class ActionHandler implements ActionListener {
             }
         } else {
             logger.info("Not your turn");
-        }
+        }*/
     }
 
-    private Position getPosition(Coordinate coordinate){
+    /*private Position getPosition(Coordinate coordinate){
         return gui.getGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
-    }
+    }*/
 
 }
