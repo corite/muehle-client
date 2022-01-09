@@ -1,7 +1,5 @@
 package frontend;
 
-import logic.entities.Position;
-import logic.entities.Coordinate;
 import logic.entities.StoneState;
 import networking.entities.*;
 import org.slf4j.Logger;
@@ -9,16 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import logic.entities.Player;
 
@@ -30,6 +23,8 @@ public class Gui {
     private final JFrame frame = new JFrame("Muehle");
     private final Button[]btn = new Button[24];
     private Button tmp = null;
+    private final JButton refreshList = new JButton("Aktualisiere Liste");
+    private final JButton confirm = new JButton("Anfrage senden");
     private Player player = null;
     private Socket socket;
     private GameResponse gameResponse;
@@ -43,11 +38,12 @@ public class Gui {
         this.createFrame();
 
         //create Socket and Thread for NetworkHandler class
-
-        socket = new Socket("localhost", 5056);
-        networkHandler = new NetworkHandler(socket, this);
-        Thread network = new Thread(networkHandler);
-        network.start();
+        synchronized (this) {
+            socket = new Socket("localhost", 5056);
+            networkHandler = new NetworkHandler(socket, this);
+            Thread network = new Thread(networkHandler);
+            network.start();
+        }
 
         //get player name input through popup window, catch empty String or cancel Operation
 
@@ -65,40 +61,7 @@ public class Gui {
 
             //put Players in Combo Box, to choose one to play against
 
-            JButton refreshList = new JButton("Aktualisiere Liste");
-            refreshList.addActionListener(e -> {
-                try {
-                    outputStream.writeObject(new ListPlayersAction(player));
-                    outputStream.flush();
-                } catch (IOException ex) {
-                    logger.debug("IO Error", ex);
-                }
-            });
-            refreshList.setPreferredSize(new Dimension(200, 50));
-            frame.add(refreshList);
-
-            playerList.addActionListener(new ComboBoxListener(this));
-            playerList.setPreferredSize(new Dimension(300,50));
-            frame.add(playerList);
-
-            JButton confirm = new JButton("Send request");
-            confirm.setPreferredSize(new Dimension(200,50));
-            confirm.addActionListener(e -> {
-                if (playerList.getSelectedItem() == null){
-                    JOptionPane.showMessageDialog(frame,"Bitte Wähle einen Spieler aus der Liste aus");
-                }else{
-                    try {
-                        outputStream.writeObject(new ConnectAction(player, (Player) playerList.getSelectedItem()));
-                        outputStream.flush();
-                        frame.remove(confirm);
-                        frame.remove(playerList);
-                        frame.remove(refreshList);
-                    } catch (IOException ex) {
-                        logger.debug("IO Error", ex);
-                    }
-                }
-            });
-            frame.add(confirm);
+            createConnectionElements(outputStream);
 
             //creating JLabel from draw class and draw settings
 
@@ -119,7 +82,7 @@ public class Gui {
             this.placeBtn();*/
         }
     }
-
+    //todo make only necessary getter/setter public and add missing getters/setters
     public Button getBtn(int i){
         return btn[i];
     }
@@ -223,5 +186,44 @@ public class Gui {
                 playerList.addItem(player);
             }
         }
+    }
+
+    private void createConnectionElements(ObjectOutputStream outputStream){
+        refreshList.addActionListener(e -> {
+            synchronized (this) {
+                try {
+                    outputStream.writeObject(new ListPlayersAction(player));
+                    outputStream.flush();
+                } catch (IOException ex) {
+                    logger.debug("IO Error", ex);
+                }
+            }
+        });
+        refreshList.setPreferredSize(new Dimension(200, 50));
+        frame.add(refreshList);
+
+        playerList.addActionListener(new ComboBoxListener(this));
+        playerList.setPreferredSize(new Dimension(300,50));
+        frame.add(playerList);
+
+        confirm.setPreferredSize(new Dimension(200,50));
+        confirm.addActionListener(e -> {
+            synchronized (this) {
+                if (playerList.getSelectedItem() == null) {
+                    JOptionPane.showMessageDialog(frame, "Bitte Wähle einen Spieler aus der Liste aus");
+                } else {
+                    try {
+                        outputStream.writeObject(new ConnectAction(player, (Player) playerList.getSelectedItem()));
+                        outputStream.flush();
+                        frame.remove(confirm);
+                        frame.remove(playerList);
+                        frame.remove(refreshList);
+                    } catch (IOException ex) {
+                        logger.debug("IO Error", ex);
+                    }
+                }
+            }
+        });
+        frame.add(confirm);
     }
 }

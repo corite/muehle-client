@@ -15,7 +15,9 @@ public class ComboBoxListener implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        JComboBox comboBox = (JComboBox) e.getSource();
-        Player player = (Player) comboBox.getSelectedItem();
+        synchronized (gui){
+            JComboBox comboBox = (JComboBox) e.getSource();
+            Player player = (Player) comboBox.getSelectedItem();
+        }
     }
 }
