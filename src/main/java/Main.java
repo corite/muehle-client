@@ -10,7 +10,5 @@ public class Main {
 
         new Gui();
 
-
-        //2 threads for backend (later networking) and frontend should be spawned here
     }
 }
