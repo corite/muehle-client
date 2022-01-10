@@ -2,6 +2,11 @@ package frontend;
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+import logic.entities.Position;
+import logic.entities.Coordinate;
+>>>>>>> parent of 9c40130 (Added some stuff)
 =======
 import logic.entities.Position;
 import logic.entities.Coordinate;
@@ -29,8 +34,13 @@ import java.net.Socket;
 <<<<<<< HEAD
 import java.util.ArrayList;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
+=======
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+>>>>>>> parent of 9c40130 (Added some stuff)
 =======
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -49,11 +59,14 @@ public class Gui {
     private Button tmp = null;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     private final JButton refreshList = new JButton("Aktualisiere Liste");
     private final JButton confirm = new JButton("Anfrage senden");
 =======
 
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
+=======
+>>>>>>> parent of 9c40130 (Added some stuff)
 =======
 >>>>>>> parent of 9c40130 (Added some stuff)
     private Player player = null;
@@ -75,6 +88,7 @@ public class Gui {
         //create Socket and Thread for NetworkHandler class
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         synchronized (this) {
             socket = new Socket("localhost", 5056);
             networkHandler = new NetworkHandler(socket, this);
@@ -87,11 +101,16 @@ public class Gui {
 
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
 =======
+=======
+>>>>>>> parent of 9c40130 (Added some stuff)
 
         socket = new Socket("localhost", 5056);
         networkHandler = new NetworkHandler(socket, this);
         Thread network = new Thread(networkHandler);
         network.start();
+<<<<<<< HEAD
+>>>>>>> parent of 9c40130 (Added some stuff)
+=======
 >>>>>>> parent of 9c40130 (Added some stuff)
 
         //get player name input through popup window, catch empty String or cancel Operation
@@ -104,10 +123,13 @@ public class Gui {
             //put Players in Combo Box, to choose one to play against
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             createConnectionElements(outputStream);
 =======
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
 =======
+=======
+>>>>>>> parent of 9c40130 (Added some stuff)
             JButton refreshList = new JButton("Aktualisiere Liste");
             refreshList.addActionListener(e -> {
                 try {
@@ -142,6 +164,9 @@ public class Gui {
                 }
             });
             frame.add(confirm);
+<<<<<<< HEAD
+>>>>>>> parent of 9c40130 (Added some stuff)
+=======
 >>>>>>> parent of 9c40130 (Added some stuff)
 
             //creating JLabel from draw class and draw settings
@@ -161,7 +186,15 @@ public class Gui {
                 createButtons(i);
             }
             this.placeBtn();*/
+<<<<<<< HEAD
 
+=======
+        }
+    }
+
+    public Button getBtn(int i){
+        return btn[i];
+>>>>>>> parent of 9c40130 (Added some stuff)
     }
 
     public GameResponse getLastGameResponse() {
@@ -339,6 +372,7 @@ public class Gui {
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 <<<<<<< HEAD
     private void createConnectionElements(ObjectOutputStream outputStream){
@@ -411,6 +445,8 @@ public class Gui {
         return getLastGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
     }
+=======
+>>>>>>> parent of 9c40130 (Added some stuff)
 =======
 >>>>>>> parent of 9c40130 (Added some stuff)
 }
