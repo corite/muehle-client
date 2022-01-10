@@ -13,6 +13,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import logic.entities.Player;
 
@@ -33,6 +35,7 @@ public class Gui {
     private final Object writerLock = new Object();
 
     private boolean isListPlayersScreenEnabled;
+    private boolean isInitialResponse = true;
 
 
 
@@ -56,21 +59,7 @@ public class Gui {
 
         //creating JLabel from draw class and draw settings
 
-/*            createLabel();
-
-            //create buttons
-
-            ArrayList<Coordinate> coordinates = gameResponse.getGameField().stream()
-                    .map(Position::getCoordinate)
-                    .sorted(((o1, o2) -> o1.getY() == o2.getY() ? Integer.compare(o1.getX(), o2.getX()) : -Integer.compare(o1.getY(), o2.getY())))
-                    //sorts the collection so that the nodes can be traversed row by row from top to bottom
-                    .collect(Collectors.toCollection(ArrayList::new));
-
-            for (int i=0; i< btn.length; i++){
-                btn[i] = new Button(coordinates.get(i));
-                createButtons(i);
-            }
-            this.placeBtn();*/
+        this.createLabel();
 
     }
 
@@ -142,6 +131,13 @@ public class Gui {
         this.tmp = tmp;
     }
 
+    public boolean isInitialResponse() {
+        return isInitialResponse;
+    }
+
+    public void setInitialResponse(boolean initialResponse) {
+        isInitialResponse = initialResponse;
+    }
 
     //Button placement
 
@@ -187,7 +183,7 @@ public class Gui {
         getDraw().repaint();
     }
 
-    private void createButtons(int i){
+    private void createButton(int i){
         getButtons()[i].setVisible(true);
 
         getButtons()[i].addActionListener(new ActionHandler(this));
@@ -196,6 +192,20 @@ public class Gui {
         getButtons()[i].setContentAreaFilled(false);
         getButtons()[i].setBorder(null);
         getFrame().add(getButtons()[i]);
+    }
+
+    private void createButtons(){
+        ArrayList<Coordinate> coordinates = getLastGameResponse().getGameField().stream()
+                .map(Position::getCoordinate)
+                .sorted(((o1, o2) -> o1.getY() == o2.getY() ? Integer.compare(o1.getX(), o2.getX()) : -Integer.compare(o1.getY(), o2.getY())))
+                //sorts the collection so that the nodes can be traversed row by row from top to bottom
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        for (int i=0; i< getButtons().length; i++){
+            getButtons()[i] = new Button(coordinates.get(i));
+            this.createButton(i);
+        }
+        this.placeBtn();
     }
 
     public synchronized void renderListPlayersResponse(ListPlayersResponse response){
@@ -273,6 +283,25 @@ public class Gui {
 
     public synchronized void renderGameResponse(GameResponse response) {
         logger.debug("rendering GameResponse");
+
+        setLastGameResponse(response);
+
+        if (isInitialResponse()) {
+            getFrame().getContentPane().removeAll();
+
+            // create Buttons only possible, after GameResponse was received
+
+            this.createButtons();
+
+            getFrame().add(getDraw());
+            for (int i = 0; i < getButtons().length; i++) {
+                getFrame().add(getBtn(i));
+            }
+            getFrame().repaint();
+            setInitialResponse(false);
+        }else {
+            getDraw().repaint();
+        }
 
         //todo: do shit
     }

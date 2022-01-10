@@ -84,8 +84,8 @@ public class Draw extends JLabel {
 
                 //draw Stones on Button Coordinates
 
-                Color btnColor = getColor(getGui().getPosition(getGui().getBtn(i).getCoordinate()).getStoneState());
                 if (!getGui().getPosition(getGui().getBtn(i).getCoordinate()).getStoneState().equals(StoneState.NONE)) {
+                    Color btnColor = getColor(getGui().getPosition(getGui().getBtn(i).getCoordinate()).getStoneState());
                     g.setColor(btnColor);
                     g.fillOval(getGui().getBtn(i).getX(), getGui().getBtn(i).getY(), 40, 40);
                     g.setColor(getOtherColor(btnColor));
