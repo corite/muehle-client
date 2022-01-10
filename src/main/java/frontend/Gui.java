@@ -1,6 +1,11 @@
 package frontend;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+import logic.entities.Position;
+import logic.entities.Coordinate;
+>>>>>>> parent of 9c40130 (Added some stuff)
 import logic.entities.StoneState;
 =======
 import logic.entities.Coordinate;
@@ -14,14 +19,22 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.Socket;
 <<<<<<< HEAD
 import java.util.ArrayList;
+<<<<<<< HEAD
 =======
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
+=======
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+>>>>>>> parent of 9c40130 (Added some stuff)
 
 import logic.entities.Player;
 
@@ -35,11 +48,14 @@ public class Gui {
     private final Button[] buttons = new Button[24];
     private Button tmp = null;
 <<<<<<< HEAD
+<<<<<<< HEAD
     private final JButton refreshList = new JButton("Aktualisiere Liste");
     private final JButton confirm = new JButton("Anfrage senden");
 =======
 
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
+=======
+>>>>>>> parent of 9c40130 (Added some stuff)
     private Player player = null;
     private GameResponse lastGameResponse;
 
@@ -58,6 +74,7 @@ public class Gui {
 
         //create Socket and Thread for NetworkHandler class
 <<<<<<< HEAD
+<<<<<<< HEAD
         synchronized (this) {
             socket = new Socket("localhost", 5056);
             networkHandler = new NetworkHandler(socket, this);
@@ -69,6 +86,13 @@ public class Gui {
         this.establishConnectionWithServer();
 
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
+=======
+
+        socket = new Socket("localhost", 5056);
+        networkHandler = new NetworkHandler(socket, this);
+        Thread network = new Thread(networkHandler);
+        network.start();
+>>>>>>> parent of 9c40130 (Added some stuff)
 
         //get player name input through popup window, catch empty String or cancel Operation
 
@@ -79,9 +103,46 @@ public class Gui {
 <<<<<<< HEAD
             //put Players in Combo Box, to choose one to play against
 
+<<<<<<< HEAD
             createConnectionElements(outputStream);
 =======
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
+=======
+            JButton refreshList = new JButton("Aktualisiere Liste");
+            refreshList.addActionListener(e -> {
+                try {
+                    outputStream.writeObject(new ListPlayersAction(player));
+                    outputStream.flush();
+                } catch (IOException ex) {
+                    logger.debug("IO Error", ex);
+                }
+            });
+            refreshList.setPreferredSize(new Dimension(200, 50));
+            frame.add(refreshList);
+
+            playerList.addActionListener(new ComboBoxListener(this));
+            playerList.setPreferredSize(new Dimension(300,50));
+            frame.add(playerList);
+
+            JButton confirm = new JButton("Send request");
+            confirm.setPreferredSize(new Dimension(200,50));
+            confirm.addActionListener(e -> {
+                if (playerList.getSelectedItem() == null){
+                    JOptionPane.showMessageDialog(frame,"Bitte Wähle einen Spieler aus der Liste aus");
+                }else{
+                    try {
+                        outputStream.writeObject(new ConnectAction(player, (Player) playerList.getSelectedItem()));
+                        outputStream.flush();
+                        frame.remove(confirm);
+                        frame.remove(playerList);
+                        frame.remove(refreshList);
+                    } catch (IOException ex) {
+                        logger.debug("IO Error", ex);
+                    }
+                }
+            });
+            frame.add(confirm);
+>>>>>>> parent of 9c40130 (Added some stuff)
 
             //creating JLabel from draw class and draw settings
 
@@ -142,7 +203,7 @@ public class Gui {
     public Object getWriterLock() {
         return writerLock;
     }
-    //todo make only necessary getter/setter public and add missing getters/setters
+
     public Button getBtn(int i){
         return buttons[i];
     }
@@ -277,6 +338,7 @@ public class Gui {
             }
         }
     }
+<<<<<<< HEAD
 
 <<<<<<< HEAD
     private void createConnectionElements(ObjectOutputStream outputStream){
@@ -349,4 +411,6 @@ public class Gui {
         return getLastGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
 >>>>>>> 6b3076bcc6367262875af541f67ba07f8fad45d3
     }
+=======
+>>>>>>> parent of 9c40130 (Added some stuff)
 }
