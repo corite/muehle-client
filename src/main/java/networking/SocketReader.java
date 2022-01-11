@@ -41,6 +41,8 @@ public class SocketReader implements Runnable {
                     handleListPlayersResponse((ListPlayersResponse) inputObject);
                 } else if (inputObject instanceof GameResponse) {
                     handleGameResponse((GameResponse) inputObject);
+                } else if (inputObject instanceof EndSessionResponse){
+                    handleEndSessionResponse((EndSessionResponse) inputObject);
                 } else throw new ClassNotFoundException("Read input object not supported");
             }
         } catch (IOException e) {
@@ -74,5 +76,9 @@ public class SocketReader implements Runnable {
         getGui().setLastGameResponse(response);
 
         getGui().renderGameResponse(response);
+    }
+
+    public void handleEndSessionResponse(EndSessionResponse response){
+        getGui().renderEndSessionResponse(response);
     }
 }

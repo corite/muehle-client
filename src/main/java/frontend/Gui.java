@@ -1,6 +1,7 @@
 package frontend;
 
 import logic.entities.Coordinate;
+import logic.entities.GamePhase;
 import logic.entities.Position;
 import networking.SocketReader;
 import networking.SocketWriter;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -54,13 +57,6 @@ public class Gui {
 
         this.readNameAndSendInitialAction();
 
-
-
-
-        //creating JLabel from draw class and draw settings
-
-        this.createLabel();
-
     }
 
     public GameResponse getLastGameResponse() {
@@ -69,6 +65,9 @@ public class Gui {
 
     public void setLastGameResponse(GameResponse lastGameResponse) {
         this.lastGameResponse = lastGameResponse;
+        if (getPlayer().toString().equals(lastGameResponse.getNextPlayerToMove().toString())){
+            setPlayer(lastGameResponse.getNextPlayerToMove());
+        }else setPlayer(lastGameResponse.getOtherPlayer());
     }
 
     public boolean isListPlayersScreenEnabled() {
@@ -293,17 +292,54 @@ public class Gui {
 
             this.createButtons();
 
+            //creating JLabel from draw class and draw settings
+            System.out.println(getPlayer().getColor());
+            this.createLabel();
+
             getFrame().add(getDraw());
+
             for (int i = 0; i < getButtons().length; i++) {
                 getFrame().add(getBtn(i));
             }
+
+            placeEndSessionButton();
+
             getFrame().repaint();
             setInitialResponse(false);
-        }else {
+        }
+        else {
+            if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON) || getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
+                for (int i=0; i<getButtons().length;i++) {
+                    getFrame().getContentPane().remove(getBtn(i));
+                }
+            }
             getDraw().repaint();
         }
 
         //todo: do shit
+    }
+
+    private synchronized void placeEndSessionButton(){
+        JButton endSession = new JButton("Spiel Beenden");
+        endSession.setBounds(770, 650, 200, 50);
+        endSession.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
+                Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
+                endSessionWriter.start();
+            }
+        });
+        getFrame().add(endSession);
+    }
+
+    public synchronized void renderEndSessionResponse(EndSessionResponse response){
+        getFrame().getContentPane().removeAll();
+        getFrame().repaint();
+        setListPlayersScreenEnabled(false);
+        ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
+        Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
+        listPlayerWriter.start();
     }
 
     public Position getPosition(Coordinate coordinate){

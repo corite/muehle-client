@@ -1,5 +1,7 @@
 package frontend;
 
+import logic.entities.GamePhase;
+import logic.entities.Player;
 import logic.entities.StoneState;
 
 import javax.swing.*;
@@ -128,23 +130,21 @@ public class Draw extends JLabel {
 
         //todo: @burned: das folgende auskommentierte hab Ich mir noch nicht weiter angeschaut, da das glaube Ich noch vorher
         // die oben genannten Änderungen vorrraussetzt
-        /*
+
         g.setFont(g.getFont().deriveFont(g.getFont().getSize() * 1.4F));
-        if (getGui().getGame().getPlayer1().getPhase().equals(GamePhase.WON)) {
-            g.drawString(getResizedString(getGui().getGame().getPlayer1().getName()) + " hat gewonnen.", 700, 50);
-        }
-        else if (getGui().getGame().getPlayer2().getPhase().equals(GamePhase.WON)) {
-            g.drawString(getResizedString(getGui().getGame().getPlayer2().getName()) + " hat gewonnen.", 700, 50);
+        Player winningPlayer = getWinningPlayer();
+        if (winningPlayer != null){
+            g.drawString(getResizedString(winningPlayer.toString()) + " hat gewonnen.", 700, 50);
         }
         else {
-            g.drawString(getResizedString(getGui().getGame().getNextPlayerToMove().getName()) + " ist am Zug.", 700, 50);
+            g.drawString(getResizedString(getGui().getLastGameResponse().getNextPlayerToMove().toString()) + " ist am Zug.", 700, 50);
         }
-        g.drawString(getResizedString(getGui().getGame().getPlayer1().getName()) + " spielt " + getColorAsString(getGui().getGame().getPlayer1().getColor()) + ".", 700, 100);
-        g.drawString(getResizedString(getGui().getGame().getPlayer2().getName()) + " spielt " + getColorAsString(getGui().getGame().getPlayer2().getColor()) + ".", 700, 125);
+        g.drawString(getResizedString(getGui().getPlayer().toString()) + " spielt " + getColorAsString(getGui().getPlayer().getColor()) + ".", 700, 100);
+        g.drawString(getResizedString(getOpposingPlayer().toString()) + " spielt " + getColorAsString(getOpposingPlayer().getColor()) + ".", 700, 125);
 
         //draw remaining Stones of the players
 
-        for (int i=0; i<=8-getGui().getGame().getPlayer1().getPlacedStones(); i++){
+        for (int i=0; i<=8-getPlayerWithColor(StoneState.WHITE).getPlacedStones(); i++){
             g.setColor(Color.WHITE);
             g.fillOval(700, 600-i*50,40,40);
             g.setColor(Color.BLACK);
@@ -152,14 +152,14 @@ public class Draw extends JLabel {
             g.drawOval(700+10, 600-i*50+10, 20, 20);
         }
 
-        for (int i=0; i<=8-getGui().getGame().getPlayer2().getPlacedStones(); i++){
+        for (int i=0; i<=8-getPlayerWithColor(StoneState.BLACK).getPlacedStones(); i++){
             g.setColor(Color.BLACK);
             g.fillOval(750, 600-i*50,40,40);
             g.setColor(Color.WHITE);
             g.drawOval(750+5, 600-i*50+5, 30, 30);
             g.drawOval(750+10, 600-i*50+10, 20, 20);
             g.setColor(Color.BLACK);
-        }*/
+        }
     }
 
     private String getResizedString(String a) {
@@ -192,5 +192,28 @@ public class Draw extends JLabel {
         } else if (StoneState.BLACK.equals(stoneState)) {
             return Color.BLACK;
         } else throw new IllegalArgumentException("unknown StoneState");
+    }
+
+    private Player getWinningPlayer(){
+        if (getGui().getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON)){
+            return getGui().getLastGameResponse().getNextPlayerToMove();
+        } else if (getGui().getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
+            return getGui().getLastGameResponse().getOtherPlayer();
+        }else{
+            return null;
+        }
+    }
+
+    private Player getOpposingPlayer(){
+        if (getGui().getPlayer().equals(getGui().getLastGameResponse().getNextPlayerToMove())){
+            return getGui().getLastGameResponse().getOtherPlayer();
+        }
+        else return getGui().getLastGameResponse().getNextPlayerToMove();
+    }
+
+    private Player getPlayerWithColor(StoneState stoneState){
+        if (getGui().getPlayer().getColor().equals(stoneState)){
+            return getGui().getPlayer();
+        }else return getOpposingPlayer();
     }
 }
