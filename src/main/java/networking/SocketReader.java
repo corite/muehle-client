@@ -82,3 +82,5 @@ public class SocketReader implements Runnable {
         getGui().renderEndSessionResponse(response);
     }
 }
+// todo playerlost response popup window
+// todo ReconnectAction

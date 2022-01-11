@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -38,7 +36,7 @@ public class Gui {
     private final Object writerLock = new Object();
 
     private boolean isListPlayersScreenEnabled;
-    private boolean isInitialResponse = true;
+    private boolean isGameScreenEnabled;
 
 
 
@@ -118,10 +116,6 @@ public class Gui {
         return draw;
     }
 
-    public JComboBox getComboBox() {
-        return playerList;
-    }
-
     public Button getTmp() {
         return tmp;
     }
@@ -130,12 +124,12 @@ public class Gui {
         this.tmp = tmp;
     }
 
-    public boolean isInitialResponse() {
-        return isInitialResponse;
+    public boolean isGameScreenEnabled() {
+        return isGameScreenEnabled;
     }
 
-    public void setInitialResponse(boolean initialResponse) {
-        isInitialResponse = initialResponse;
+    public void setGameScreenEnabled(boolean isGameScreenEnabled) {
+        this.isGameScreenEnabled = isGameScreenEnabled;
     }
 
     //Button placement
@@ -170,7 +164,7 @@ public class Gui {
     private void createFrame(){
         getFrame().setBounds(0, 0, 1000, 750);
         getFrame().setLayout(new FlowLayout());
-        getFrame().getContentPane().setBackground(Color.decode("#FDFD96"));
+        getFrame().getContentPane().setBackground(Color.decode("#FFF4E6"));
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().setVisible(true);
         getFrame().setResizable(false);
@@ -244,6 +238,7 @@ public class Gui {
             });
             getFrame().add(sendRequestButton);
             setListPlayersScreenEnabled(true);
+            setGameScreenEnabled(false);
         }
 
 
@@ -285,7 +280,9 @@ public class Gui {
 
         setLastGameResponse(response);
 
-        if (isInitialResponse()) {
+        if (!isGameScreenEnabled()) {
+            getFrame().setTitle(getPlayer() + " spielt Muehle gegen " + getOpposingPlayer());
+
             getFrame().getContentPane().removeAll();
 
             // create Buttons only possible, after GameResponse was received
@@ -293,7 +290,7 @@ public class Gui {
             this.createButtons();
 
             //creating JLabel from draw class and draw settings
-            System.out.println(getPlayer().getColor());
+
             this.createLabel();
 
             getFrame().add(getDraw());
@@ -305,7 +302,8 @@ public class Gui {
             placeEndSessionButton();
 
             getFrame().repaint();
-            setInitialResponse(false);
+            setGameScreenEnabled(true);
+            setListPlayersScreenEnabled(false);
         }
         else {
             if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON) || getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
@@ -316,27 +314,24 @@ public class Gui {
             getDraw().repaint();
         }
 
-        //todo: do shit
     }
 
     private synchronized void placeEndSessionButton(){
         JButton endSession = new JButton("Spiel Beenden");
         endSession.setBounds(770, 650, 200, 50);
-        endSession.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
-                Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
-                endSessionWriter.start();
-            }
+        endSession.addActionListener(e -> {
+            EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
+            Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
+            endSessionWriter.start();
         });
         getFrame().add(endSession);
     }
 
     public synchronized void renderEndSessionResponse(EndSessionResponse response){
+        getFrame().setTitle("Muehle");
         getFrame().getContentPane().removeAll();
         getFrame().repaint();
-        setListPlayersScreenEnabled(false);
+        JOptionPane.showMessageDialog(getFrame(), response.getMessage());
         ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
         Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
         listPlayerWriter.start();
@@ -345,4 +340,12 @@ public class Gui {
     public Position getPosition(Coordinate coordinate){
         return getLastGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
     }
+
+    public Player getOpposingPlayer(){
+        if (getLastGameResponse().getNextPlayerToMove().equals(getPlayer())){
+            return getLastGameResponse().getOtherPlayer();
+        } else return getLastGameResponse().getNextPlayerToMove();
+    }
+
 }
+// todo popup window after win back to home screen/close client

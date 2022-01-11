@@ -136,11 +136,13 @@ public class Draw extends JLabel {
         if (winningPlayer != null){
             g.drawString(getResizedString(winningPlayer.toString()) + " hat gewonnen.", 700, 50);
         }
-        else {
-            g.drawString(getResizedString(getGui().getLastGameResponse().getNextPlayerToMove().toString()) + " ist am Zug.", 700, 50);
+        else if (getGui().getLastGameResponse().getNextPlayerToMove().equals(getGui().getPlayer())){
+            g.drawString("Du bist am Zug!", 700, 50);
+        }else{
+            g.drawString("Dein Gegner ist am Zug!", 700, 50);
         }
         g.drawString(getResizedString(getGui().getPlayer().toString()) + " spielt " + getColorAsString(getGui().getPlayer().getColor()) + ".", 700, 100);
-        g.drawString(getResizedString(getOpposingPlayer().toString()) + " spielt " + getColorAsString(getOpposingPlayer().getColor()) + ".", 700, 125);
+        g.drawString(getResizedString(getGui().getOpposingPlayer().toString()) + " spielt " + getColorAsString(getGui().getOpposingPlayer().getColor()) + ".", 700, 125);
 
         //draw remaining Stones of the players
 
@@ -204,16 +206,9 @@ public class Draw extends JLabel {
         }
     }
 
-    private Player getOpposingPlayer(){
-        if (getGui().getPlayer().equals(getGui().getLastGameResponse().getNextPlayerToMove())){
-            return getGui().getLastGameResponse().getOtherPlayer();
-        }
-        else return getGui().getLastGameResponse().getNextPlayerToMove();
-    }
-
     private Player getPlayerWithColor(StoneState stoneState){
         if (getGui().getPlayer().getColor().equals(stoneState)){
             return getGui().getPlayer();
-        }else return getOpposingPlayer();
+        }else return getGui().getOpposingPlayer();
     }
 }
