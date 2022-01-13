@@ -101,4 +101,3 @@ public class SocketReader implements Runnable {
         getGui().renderDisconnectResponse(response);
     }
 }
-// todo playerlost response popup window

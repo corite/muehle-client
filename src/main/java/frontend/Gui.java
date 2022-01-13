@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -182,7 +184,7 @@ public class Gui {
         getButtons()[i].addActionListener(new ActionHandler(this));
 
         getButtons()[i].setFocusPainted(false);
-        getButtons()[i].setContentAreaFilled(false);
+        getButtons()[i].setContentAreaFilled(true);
         getButtons()[i].setBorder(null);
         getFrame().add(getButtons()[i]);
     }
@@ -203,7 +205,6 @@ public class Gui {
 
     public synchronized void renderListPlayersResponse(ListPlayersResponse response){
         logger.debug("rendering ListPlayersResponse");
-        //put Players in Combo Box, to choose one to play against
         if (!isListPlayersScreenEnabled()) {
             logger.debug("instantiating all UI-Objects for ListPlayersResponse once");
 
@@ -213,26 +214,36 @@ public class Gui {
                 ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
                 Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
                 socketWriter.start();
+                logger.debug("sending ListPlayersAction");
             });
             refreshListButton.setPreferredSize(new Dimension(200, 50));
             getFrame().add(refreshListButton);
 
             //render player list
-            getPlayerList().addActionListener(new ComboBoxListener(this));
             getPlayerList().setPreferredSize(new Dimension(300, 50));
             getFrame().add(getPlayerList());
+
+            //render connect button
+            JButton connectButton = new JButton("Anfrage senden");
+            connectButton.addActionListener(e -> {
+                ConnectAction connectAction = new ConnectAction(getPlayer(), (Player) getPlayerList().getSelectedItem());
+                Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
+                socketWriter.start();
+                logger.debug("sending ConnectAction");
+            });
+            connectButton.setPreferredSize(new Dimension(200, 50));
+            getFrame().add(connectButton);
 
             setListPlayersScreenEnabled(true);
             setGameScreenEnabled(false);
         }
 
-
+        //if Player Screen is already enabled refresh ComboBox
         getPlayerList().removeAllItems();
         if (response.getPlayers().isEmpty()){
             JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in später zu aktualisieren.");
             getPlayerList().addItem(null);
         } else {
-            getPlayerList().addItem(null);
             for (Player player : response.getPlayers()){
                 getPlayerList().addItem(player);
             }
@@ -259,21 +270,21 @@ public class Gui {
         //send message in new thread, this thread also handles the synchronisation of the output stream
         Thread socketWriter = new Thread(new SocketWriter(getWriterLock(),initialAction,getOutputStream()));
         socketWriter.start();
+        logger.debug("Initial Action was sent to server");
     }
 
     public synchronized void renderGameResponse(GameResponse response) {
         logger.debug("rendering GameResponse");
 
         setLastGameResponse(response);
-        if (response.getNextPlayerToMove().equals(getPlayer())){
+        /*if (response.getNextPlayerToMove().equals(getPlayer())){
             setPlayer(response.getNextPlayerToMove());
         }else{
             setPlayer(response.getOtherPlayer());
-        }
+        }*/
 
         if (!isGameScreenEnabled()) {
             logger.debug("instantiating all UI Objects for game screen once");
-            System.out.println(response.getNextPlayerToMove().getPlacedStones());
             getFrame().setTitle(getPlayer() + " spielt Muehle gegen " + getOpposingPlayer());
 
             getFrame().getContentPane().removeAll();
@@ -299,6 +310,7 @@ public class Gui {
             setListPlayersScreenEnabled(false);
         }
         else {
+            //if Player wins Game show Popup window to close client/return to main menu
             if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON) || getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
                 Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
                 int result = JOptionPane.showOptionDialog(getFrame(), getWinningPlayer() + " hat gewonnen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
@@ -316,6 +328,7 @@ public class Gui {
             EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
             Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
             endSessionWriter.start();
+            logger.debug("sending EndSessionAction");
         });
         getFrame().add(endSession);
     }
@@ -330,10 +343,12 @@ public class Gui {
             ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
             Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
             listPlayerWriter.start();
+            logger.debug("sending ListPlayersAction");
         }
     }
 
     public synchronized void renderDisconnectResponse(DisconnectResponse response){
+        //if player disconnects from game show popup window to close client/return to main menu
         Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
         int result = JOptionPane.showOptionDialog(getFrame(), getOpposingPlayer() + " hat das Spiel verlassen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
         renderPopupReturnCloseDialog(result);
@@ -360,10 +375,12 @@ public class Gui {
     }
 
     private void renderPopupReturnCloseDialog(int result){
+        //handle input of the win game/disconnect popup
         if (result == JOptionPane.YES_OPTION){
             EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
             Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
             endSessionWriter.start();
+            logger.debug("sending EndSessionAction");
         } else if (result == JOptionPane.NO_OPTION){
             System.exit(0);
         }

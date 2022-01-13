@@ -125,11 +125,6 @@ public class Draw extends JLabel {
         }
 
         //draw String of moving/winning player
-        //todo: implement winning/losing properly in server and shared
-        //todo: send nextPlayerToMove in GameResponse
-
-        //todo: @burned: das folgende auskommentierte hab Ich mir noch nicht weiter angeschaut, da das glaube Ich noch vorher
-        // die oben genannten Änderungen vorrraussetzt
 
         g.setFont(g.getFont().deriveFont(g.getFont().getSize() * 1.4F));
         Player winningPlayer = getGui().getWinningPlayer();

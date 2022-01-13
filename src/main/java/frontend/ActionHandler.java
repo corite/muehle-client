@@ -53,8 +53,6 @@ public class ActionHandler implements ActionListener {
                     //Sending Move Operation to Server if Action is Move
 
                     if ((getGui().getTmp() == null && !getGui().getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) || getGui().getTmp() != null && !getGui().getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) {
-                        //todo: change stuff in server and shared so that GameResponse includes nextPlayerToMove, not boolean is your turn
-                        //todo: because the client has to know which color he is
 
                         getGui().setTmp(button);
                         logger.debug("set tmp stone at coordinate " + button.getCoordinate());
