@@ -57,7 +57,7 @@ public class ActionHandler implements ActionListener {
                         getGui().setTmp(button);
                         logger.debug("set tmp stone at coordinate " + button.getCoordinate());
 
-                    } else {
+                    } else if (getGui().getTmp() != null && getGui().getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)){
                         GameAction gameAction = new GameAction(getGui().getPlayer(), ActionType.MOVE, getGui().getTmp().getCoordinate(), button.getCoordinate());
                         Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), gameAction,getGui().getOutputStream()));
                         socketWriter.start();

@@ -184,7 +184,7 @@ public class Gui {
         getButtons()[i].addActionListener(new ActionHandler(this));
 
         getButtons()[i].setFocusPainted(false);
-        getButtons()[i].setContentAreaFilled(true);
+        getButtons()[i].setContentAreaFilled(false);
         getButtons()[i].setBorder(null);
         getFrame().add(getButtons()[i]);
     }
@@ -277,11 +277,6 @@ public class Gui {
         logger.debug("rendering GameResponse");
 
         setLastGameResponse(response);
-        /*if (response.getNextPlayerToMove().equals(getPlayer())){
-            setPlayer(response.getNextPlayerToMove());
-        }else{
-            setPlayer(response.getOtherPlayer());
-        }*/
 
         if (!isGameScreenEnabled()) {
             logger.debug("instantiating all UI Objects for game screen once");
@@ -334,9 +329,11 @@ public class Gui {
     }
 
     public synchronized void renderEndSessionResponse(EndSessionResponse response){
-        if (!isListPlayersScreenEnabled) {
+        if (!isListPlayersScreenEnabled()) {
             logger.info("rendering EndSessionResponse");
-            JOptionPane.showMessageDialog(getFrame(), response.getMessage());
+            if (!response.getMessage().contains(getPlayer().toString())) {
+                JOptionPane.showMessageDialog(getFrame(), response.getMessage());
+            }
             getFrame().setTitle(getPlayer() + " spielt Muehle");
             getFrame().getContentPane().removeAll();
             getFrame().repaint();
