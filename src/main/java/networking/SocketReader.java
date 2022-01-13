@@ -31,22 +31,36 @@ public class SocketReader implements Runnable {
     public void run() {
         try {
             while (true) {
-                ObjectInputStream ois = new ObjectInputStream(getSocket().getInputStream());
+                try {
+                    ObjectInputStream ois = new ObjectInputStream(getSocket().getInputStream());
 
-                Object inputObject = ois.readObject();
-                //todo: implement connect action
-                if (inputObject instanceof InitialResponse) {
-                    handleInitialResponse((InitialResponse) inputObject);
-                } else if (inputObject instanceof ListPlayersResponse) {
-                    handleListPlayersResponse((ListPlayersResponse) inputObject);
-                } else if (inputObject instanceof GameResponse) {
-                    handleGameResponse((GameResponse) inputObject);
-                } else if (inputObject instanceof EndSessionResponse){
-                    handleEndSessionResponse((EndSessionResponse) inputObject);
-                } else throw new ClassNotFoundException("Read input object not supported");
+                    Object inputObject = ois.readObject();
+                    //todo: implement connect action
+                    if (inputObject instanceof InitialResponse) {
+                        handleInitialResponse((InitialResponse) inputObject);
+                    } else if (inputObject instanceof ListPlayersResponse) {
+                        handleListPlayersResponse((ListPlayersResponse) inputObject);
+                    } else if (inputObject instanceof GameResponse) {
+                        handleGameResponse((GameResponse) inputObject);
+                    } else if (inputObject instanceof EndSessionResponse) {
+                        handleEndSessionResponse((EndSessionResponse) inputObject);
+                    } else if (inputObject instanceof DisconnectResponse){
+                        handleDisconnectResponse((DisconnectResponse) inputObject);
+                    } else throw new ClassNotFoundException("Read input object not supported");
+                } catch (IOException e) {
+                    logger.error("the connection was closed, trying to Reconnect", e);
+                    synchronized (getGui()){
+                        ReconnectAction reconnectAction = new ReconnectAction(getGui().getPlayer());
+                        Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), reconnectAction, getGui().getOutputStream()));
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException ex) {
+                            logger.error("Thread was interrupted while trying to perform sleep", ex);
+                        }
+                        socketWriter.start();
+                    }
+                }
             }
-        } catch (IOException e) {
-            logger.error("the connection was closed", e);
         } catch (ClassNotFoundException e) {
             logger.error("(de)serialization failed", e);
         } finally {
@@ -61,6 +75,7 @@ public class SocketReader implements Runnable {
 
     public void handleInitialResponse(InitialResponse response) {
         getGui().setPlayer(response.getSelf());
+        getGui().getFrame().setTitle(getGui().getPlayer() + " spielt Muehle");
 
 
         ListPlayersAction listPlayersAction = new ListPlayersAction(response.getSelf());
@@ -81,6 +96,9 @@ public class SocketReader implements Runnable {
     public void handleEndSessionResponse(EndSessionResponse response){
         getGui().renderEndSessionResponse(response);
     }
+
+    private void handleDisconnectResponse(DisconnectResponse response){
+        getGui().renderDisconnectResponse(response);
+    }
 }
 // todo playerlost response popup window
-// todo ReconnectAction

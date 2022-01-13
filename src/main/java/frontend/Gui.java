@@ -222,21 +222,6 @@ public class Gui {
             getPlayerList().setPreferredSize(new Dimension(300, 50));
             getFrame().add(getPlayerList());
 
-            //render send request button
-            JButton sendRequestButton = new JButton("Send request");
-            sendRequestButton.setPreferredSize(new Dimension(200,50));
-            sendRequestButton.addActionListener(e -> {
-                if (getPlayerList().getSelectedItem() == null){
-                    synchronized (this) {
-                        JOptionPane.showMessageDialog(getFrame(), "Bitte Wähle einen Spieler aus der Liste aus");
-                    }
-                } else {
-                    ConnectAction connectAction = new ConnectAction(getPlayer(), (Player) getPlayerList().getSelectedItem());
-                    Thread socketWriter = new Thread(new SocketWriter(getWriterLock(),connectAction, getOutputStream()));
-                    socketWriter.start();
-                }
-            });
-            getFrame().add(sendRequestButton);
             setListPlayersScreenEnabled(true);
             setGameScreenEnabled(false);
         }
@@ -247,6 +232,7 @@ public class Gui {
             JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in später zu aktualisieren.");
             getPlayerList().addItem(null);
         } else {
+            getPlayerList().addItem(null);
             for (Player player : response.getPlayers()){
                 getPlayerList().addItem(player);
             }
@@ -279,8 +265,15 @@ public class Gui {
         logger.debug("rendering GameResponse");
 
         setLastGameResponse(response);
+        if (response.getNextPlayerToMove().equals(getPlayer())){
+            setPlayer(response.getNextPlayerToMove());
+        }else{
+            setPlayer(response.getOtherPlayer());
+        }
 
         if (!isGameScreenEnabled()) {
+            logger.debug("instantiating all UI Objects for game screen once");
+            System.out.println(response.getNextPlayerToMove().getPlacedStones());
             getFrame().setTitle(getPlayer() + " spielt Muehle gegen " + getOpposingPlayer());
 
             getFrame().getContentPane().removeAll();
@@ -307,9 +300,9 @@ public class Gui {
         }
         else {
             if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON) || getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
-                for (int i=0; i<getButtons().length;i++) {
-                    getFrame().getContentPane().remove(getBtn(i));
-                }
+                Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
+                int result = JOptionPane.showOptionDialog(getFrame(), getWinningPlayer() + " hat gewonnen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+                renderPopupReturnCloseDialog(result);
             }
             getDraw().repaint();
         }
@@ -328,13 +321,22 @@ public class Gui {
     }
 
     public synchronized void renderEndSessionResponse(EndSessionResponse response){
-        getFrame().setTitle("Muehle");
-        getFrame().getContentPane().removeAll();
-        getFrame().repaint();
-        JOptionPane.showMessageDialog(getFrame(), response.getMessage());
-        ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
-        Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
-        listPlayerWriter.start();
+        if (!isListPlayersScreenEnabled) {
+            logger.info("rendering EndSessionResponse");
+            JOptionPane.showMessageDialog(getFrame(), response.getMessage());
+            getFrame().setTitle(getPlayer() + " spielt Muehle");
+            getFrame().getContentPane().removeAll();
+            getFrame().repaint();
+            ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
+            Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
+            listPlayerWriter.start();
+        }
+    }
+
+    public synchronized void renderDisconnectResponse(DisconnectResponse response){
+        Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
+        int result = JOptionPane.showOptionDialog(getFrame(), getOpposingPlayer() + " hat das Spiel verlassen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+        renderPopupReturnCloseDialog(result);
     }
 
     public Position getPosition(Coordinate coordinate){
@@ -347,5 +349,24 @@ public class Gui {
         } else return getLastGameResponse().getNextPlayerToMove();
     }
 
+    public Player getWinningPlayer(){
+        if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON)){
+            return getLastGameResponse().getNextPlayerToMove();
+        } else if (getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
+            return getLastGameResponse().getOtherPlayer();
+        }else{
+            return null;
+        }
+    }
+
+    private void renderPopupReturnCloseDialog(int result){
+        if (result == JOptionPane.YES_OPTION){
+            EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
+            Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
+            endSessionWriter.start();
+        } else if (result == JOptionPane.NO_OPTION){
+            System.exit(0);
+        }
+    }
+
 }
-// todo popup window after win back to home screen/close client

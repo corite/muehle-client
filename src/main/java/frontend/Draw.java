@@ -132,7 +132,7 @@ public class Draw extends JLabel {
         // die oben genannten Änderungen vorrraussetzt
 
         g.setFont(g.getFont().deriveFont(g.getFont().getSize() * 1.4F));
-        Player winningPlayer = getWinningPlayer();
+        Player winningPlayer = getGui().getWinningPlayer();
         if (winningPlayer != null){
             g.drawString(getResizedString(winningPlayer.toString()) + " hat gewonnen.", 700, 50);
         }
@@ -194,16 +194,6 @@ public class Draw extends JLabel {
         } else if (StoneState.BLACK.equals(stoneState)) {
             return Color.BLACK;
         } else throw new IllegalArgumentException("unknown StoneState");
-    }
-
-    private Player getWinningPlayer(){
-        if (getGui().getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON)){
-            return getGui().getLastGameResponse().getNextPlayerToMove();
-        } else if (getGui().getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
-            return getGui().getLastGameResponse().getOtherPlayer();
-        }else{
-            return null;
-        }
     }
 
     private Player getPlayerWithColor(StoneState stoneState){

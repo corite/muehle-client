@@ -1,6 +1,8 @@
 package frontend;
 
 import logic.entities.Player;
+import networking.SocketWriter;
+import networking.entities.ConnectAction;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -13,15 +15,22 @@ public class ComboBoxListener implements ActionListener{
         this.gui = gui;
     }
 
+    public Gui getGui() {
+        return gui;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        synchronized (gui){
+        synchronized (getGui()){
             JComboBox comboBox = (JComboBox) e.getSource();
             Player player = (Player) comboBox.getSelectedItem();
+            if (player != null) {
+                ConnectAction connectAction = new ConnectAction(getGui().getPlayer(), player);
+                Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), connectAction, getGui().getOutputStream()));
+                socketWriter.start();
+            }
         }
-        JComboBox comboBox = (JComboBox) e.getSource();
-        Player player = (Player) comboBox.getSelectedItem();
         //todo: @burned: können wir damit den SendRequestButton wegrationalisieren, sodass die anfrage direkt bei der auswahl gesendet wird?
         // Wenn ja wäre das denke Ich cool.
     }
