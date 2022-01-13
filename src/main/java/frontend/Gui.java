@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -259,7 +257,7 @@ public class Gui {
         socketReader.start();
     }
 
-    private synchronized void readNameAndSendInitialAction() throws IOException{
+    private synchronized void readNameAndSendInitialAction() {
         String name = null;
 
         while (name == null || name.equals("")) {
@@ -347,7 +345,7 @@ public class Gui {
     public synchronized void renderDisconnectResponse(DisconnectResponse response){
         //if player disconnects from game show popup window to close client/return to main menu
         Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
-        int result = JOptionPane.showOptionDialog(getFrame(), getOpposingPlayer() + " hat das Spiel verlassen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+        int result = JOptionPane.showOptionDialog(getFrame(), response.getDisconnectedPlayer() + " hat das Spiel verlassen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
         renderPopupReturnCloseDialog(result);
     }
 

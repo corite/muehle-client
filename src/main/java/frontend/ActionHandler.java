@@ -1,6 +1,5 @@
 package frontend;
 
-import logic.entities.Coordinate;
 import logic.entities.StoneState;
 import networking.SocketWriter;
 import networking.entities.ActionType;
@@ -8,7 +7,6 @@ import networking.entities.GameAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import logic.entities.Position;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

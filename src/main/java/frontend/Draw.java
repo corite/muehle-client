@@ -1,6 +1,5 @@
 package frontend;
 
-import logic.entities.GamePhase;
 import logic.entities.Player;
 import logic.entities.StoneState;
 
@@ -97,22 +96,6 @@ public class Draw extends JLabel {
                         g.setColor(Color.BLACK);
                     }
                 }
-                //todo:the thing above is supposed to be a shortened Version of the if else below, but I'm not 100% sure that it behaves exactly the same
-                /*
-                if (getGui().getGame().getPositionAtCoordinate(getGui().getBtn(i).getCoordinate()).getStoneState().equals(StoneState.BLACK)) {
-                    g.setColor(Color.BLACK);
-                    g.fillOval(getGui().getBtn(i).getX(), getGui().getBtn(i).getY(), 40, 40);
-                    g.setColor(Color.WHITE);
-                    g.drawOval(getGui().getBtn(i).getX()+5, getGui().getBtn(i).getY()+5, 30, 30);
-                    g.drawOval(getGui().getBtn(i).getX()+10, getGui().getBtn(i).getY()+10, 20, 20);
-                    g.setColor(Color.BLACK);
-                } else if (getGui().getGame().getPositionAtCoordinate(getGui().getBtn(i).getCoordinate()).getStoneState().equals(StoneState.WHITE)) {
-                    g.setColor(Color.WHITE);
-                    g.fillOval(getGui().getBtn(i).getX(), getGui().getBtn(i).getY(), 40, 40);
-                    g.setColor(Color.BLACK);
-                    g.drawOval(getGui().getBtn(i).getX()+5, getGui().getBtn(i).getY()+5, 30, 30);
-                    g.drawOval(getGui().getBtn(i).getX()+10, getGui().getBtn(i).getY()+10, 20, 20);
-                }*/
 
                 //draw red circle around selected Button during move/fly phase
 
@@ -132,10 +115,19 @@ public class Draw extends JLabel {
             g.drawString(getResizedString(winningPlayer.toString()) + " hat gewonnen.", 700, 50);
         }
         else if (getGui().getLastGameResponse().getNextPlayerToMove().equals(getGui().getPlayer())){
-            g.drawString("Du bist am Zug!", 700, 50);
-        }else{
-            g.drawString("Dein Gegner ist am Zug!", 700, 50);
+            switch (getGui().getLastGameResponse().getNextAction()){
+                case PLACE -> g.drawString("Du musst einen Stein setzen!", 700, 50);
+                case TAKE -> g.drawString("Du musst einen Stein nehmen!", 700, 50);
+                case MOVE -> g.drawString("Du musst einen Stein bewegen!", 700, 50);
+            }
+        }else {
+            switch (getGui().getLastGameResponse().getNextAction()) {
+                case PLACE -> g.drawString("Dein Gegner setzt einen Stein!", 700, 50);
+                case TAKE -> g.drawString("Dein Gegner nimmt einen Stein!", 700, 50);
+                case MOVE -> g.drawString("Dein Gegner zieht einen Stein!", 700, 50);
+            }
         }
+
         g.drawString(getResizedString(getGui().getPlayer().toString()) + " spielt " + getColorAsString(getGui().getPlayer().getColor()) + ".", 700, 100);
         g.drawString(getResizedString(getGui().getOpposingPlayer().toString()) + " spielt " + getColorAsString(getGui().getOpposingPlayer().getColor()) + ".", 700, 125);
 
