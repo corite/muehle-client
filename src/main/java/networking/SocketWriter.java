@@ -20,15 +20,15 @@ public class SocketWriter implements Runnable {
         this.outputStream = outputStream;
     }
 
-    public Object getLock() {
+    private Object getLock() {
         return lock;
     }
 
-    public Object getMessage() {
+    private Object getMessage() {
         return message;
     }
 
-    public OutputStream getOutputStream() {
+    private OutputStream getOutputStream() {
         return outputStream;
     }
 

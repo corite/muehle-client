@@ -13,7 +13,7 @@ public class Draw extends JLabel {
         this.gui = gui;
     }
 
-    public Gui getGui() {
+    private Gui getGui() {
         return gui;
     }
 

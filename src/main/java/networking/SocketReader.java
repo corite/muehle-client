@@ -19,11 +19,11 @@ public class SocketReader implements Runnable {
         this.gui = gui;
     }
 
-    public Socket getSocket() {
+    private Socket getSocket() {
         return socket;
     }
 
-    public Gui getGui() {
+    private Gui getGui() {
         return gui;
     }
 
@@ -73,7 +73,7 @@ public class SocketReader implements Runnable {
         }
     }
 
-    public void handleInitialResponse(InitialResponse response) {
+    private void handleInitialResponse(InitialResponse response) {
         getGui().setPlayer(response.getSelf());
         getGui().getFrame().setTitle(getGui().getPlayer() + " spielt Muehle");
 
@@ -83,17 +83,17 @@ public class SocketReader implements Runnable {
         socketWriter.start();
     }
 
-    public void handleListPlayersResponse(ListPlayersResponse response) {
+    private void handleListPlayersResponse(ListPlayersResponse response) {
         getGui().renderListPlayersResponse(response);
     }
 
-    public void handleGameResponse(GameResponse response) {
+    private void handleGameResponse(GameResponse response) {
         getGui().setLastGameResponse(response);
 
         getGui().renderGameResponse(response);
     }
 
-    public void handleEndSessionResponse(EndSessionResponse response){
+    private void handleEndSessionResponse(EndSessionResponse response){
         getGui().renderEndSessionResponse(response);
     }
 

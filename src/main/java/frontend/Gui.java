@@ -68,15 +68,15 @@ public class Gui {
         }else setPlayer(lastGameResponse.getOtherPlayer());
     }
 
-    public boolean isListPlayersScreenEnabled() {
+    private boolean isListPlayersScreenEnabled() {
         return isListPlayersScreenEnabled;
     }
 
-    public void setListPlayersScreenEnabled(boolean listPlayersScreenEnabled) {
+    private void setListPlayersScreenEnabled(boolean listPlayersScreenEnabled) {
         isListPlayersScreenEnabled = listPlayersScreenEnabled;
     }
 
-    public JComboBox<Player> getPlayerList() {
+    private JComboBox<Player> getPlayerList() {
         return playerList;
     }
 
@@ -84,7 +84,7 @@ public class Gui {
         return frame;
     }
 
-    public Button[] getButtons() {
+    private Button[] getButtons() {
         return buttons;
     }
 
@@ -92,7 +92,7 @@ public class Gui {
         return outputStream;
     }
 
-    public void setOutputStream(OutputStream outputStream) {
+    private void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
@@ -124,11 +124,11 @@ public class Gui {
         this.tmp = tmp;
     }
 
-    public boolean isGameScreenEnabled() {
+    private boolean isGameScreenEnabled() {
         return isGameScreenEnabled;
     }
 
-    public void setGameScreenEnabled(boolean isGameScreenEnabled) {
+    private void setGameScreenEnabled(boolean isGameScreenEnabled) {
         this.isGameScreenEnabled = isGameScreenEnabled;
     }
 
@@ -328,7 +328,7 @@ public class Gui {
 
     public synchronized void renderEndSessionResponse(EndSessionResponse response){
         if (!isListPlayersScreenEnabled()) {
-            logger.info("rendering EndSessionResponse");
+            logger.debug("rendering EndSessionResponse");
             if (!response.getMessage().contains(getPlayer().toString())) {
                 JOptionPane.showMessageDialog(getFrame(), response.getMessage());
             }
@@ -369,7 +369,7 @@ public class Gui {
         }
     }
 
-    private void renderPopupReturnCloseDialog(int result){
+    private synchronized void renderPopupReturnCloseDialog(int result){
         //handle input of the win game/disconnect popup
         if (result == JOptionPane.YES_OPTION){
             EndSessionAction endSessionAction = new EndSessionAction(getPlayer());

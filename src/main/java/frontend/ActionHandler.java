@@ -21,12 +21,12 @@ public class ActionHandler implements ActionListener {
         this.gui = gui;
     }
 
-    public Gui getGui() {
+    private Gui getGui() {
         return gui;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public synchronized void actionPerformed(ActionEvent e) {
         if (getGui().getLastGameResponse().getNextPlayerToMove().equals(getGui().getPlayer())){
             if (e.getSource() instanceof Button button) {
                 Draw draw = getGui().getDraw();
