@@ -259,7 +259,7 @@ public class Gui {
 
     public synchronized void readNameAndSendInitialAction() {
         JTextField username = new JTextField(15);
-        JTextField password = new JTextField(15);
+        JTextField password = new JPasswordField(15);
         JCheckBox register = new JCheckBox();
 
         JPanel registration = new JPanel(new GridLayout(0, 2));
