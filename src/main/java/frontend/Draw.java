@@ -2,6 +2,7 @@ package frontend;
 
 import logic.entities.Player;
 import logic.entities.StoneState;
+import logic.entities.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -110,11 +111,11 @@ public class Draw extends JLabel {
         //draw String of moving/winning player
 
         g.setFont(g.getFont().deriveFont(g.getFont().getSize() * 1.4F));
-        Player winningPlayer = getGui().getWinningPlayer();
-        if (winningPlayer != null){
-            g.drawString(getResizedString(winningPlayer.toString()) + " hat gewonnen.", 700, 50);
+        User winningUser = getGui().getWinningUser();
+        if (winningUser != null){
+            g.drawString(getResizedString(winningUser.toString()) + " hat gewonnen.", 700, 50);
         }
-        else if (getGui().getLastGameResponse().getNextPlayerToMove().equals(getGui().getPlayer())){
+        else if (getGui().getLastGameResponse().getNextPlayerToMove().getUser().equals(getGui().getUser())){
             switch (getGui().getLastGameResponse().getNextAction()){
                 case PLACE -> g.drawString("Du musst einen Stein setzen!", 700, 50);
                 case TAKE -> g.drawString("Du musst einen Stein nehmen!", 700, 50);
@@ -128,8 +129,8 @@ public class Draw extends JLabel {
             }
         }
 
-        g.drawString(getResizedString(getGui().getPlayer().toString()) + " spielt " + getColorAsString(getGui().getPlayer().getColor()) + ".", 700, 100);
-        g.drawString(getResizedString(getGui().getOpposingPlayer().toString()) + " spielt " + getColorAsString(getGui().getOpposingPlayer().getColor()) + ".", 700, 125);
+        g.drawString(getResizedString(getGui().getUser().toString()) + " spielt " + getColorAsString(getGui().getPlayerFromUser(getGui().getUser()).getColor()) + ".", 700, 100);
+        g.drawString(getResizedString(getGui().getOpposingUser().toString()) + " spielt " + getColorAsString(getGui().getPlayerFromUser(getGui().getOpposingUser()).getColor()) + ".", 700, 125);
 
         //draw remaining Stones of the players
 
@@ -184,8 +185,8 @@ public class Draw extends JLabel {
     }
 
     private Player getPlayerWithColor(StoneState stoneState){
-        if (getGui().getPlayer().getColor().equals(stoneState)){
-            return getGui().getPlayer();
-        }else return getGui().getOpposingPlayer();
+        if (getGui().getPlayerFromUser(getGui().getUser()).getColor().equals(stoneState)){
+            return getGui().getPlayerFromUser(getGui().getUser());
+        }else return getGui().getPlayerFromUser(getGui().getOpposingUser());
     }
 }

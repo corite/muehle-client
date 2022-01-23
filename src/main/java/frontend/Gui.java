@@ -1,8 +1,6 @@
 package frontend;
 
-import logic.entities.Coordinate;
-import logic.entities.GamePhase;
-import logic.entities.Position;
+import logic.entities.*;
 import networking.SocketReader;
 import networking.SocketWriter;
 import networking.entities.*;
@@ -17,19 +15,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import logic.entities.Player;
-
 public class Gui {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final JComboBox<Player> playerList = new JComboBox<>();
+    private final JComboBox<User> userList = new JComboBox<>();
     private final Draw draw = new Draw(this);
     private final JFrame frame = new JFrame("Muehle");
     private final Button[] buttons = new Button[24];
     private Button tmp = null;
 
-    private Player player = null;
+    private User user = null;
     private GameResponse lastGameResponse;
 
     private OutputStream outputStream;
@@ -63,9 +59,9 @@ public class Gui {
 
     public void setLastGameResponse(GameResponse lastGameResponse) {
         this.lastGameResponse = lastGameResponse;
-        if (getPlayer().toString().equals(lastGameResponse.getNextPlayerToMove().toString())){
-            setPlayer(lastGameResponse.getNextPlayerToMove());
-        }else setPlayer(lastGameResponse.getOtherPlayer());
+        if (getUser().toString().equals(lastGameResponse.getNextPlayerToMove().getUser().toString())){
+            setUser(lastGameResponse.getNextPlayerToMove().getUser());
+        }else setUser(lastGameResponse.getOtherPlayer().getUser());
     }
 
     private boolean isListPlayersScreenEnabled() {
@@ -76,8 +72,8 @@ public class Gui {
         isListPlayersScreenEnabled = listPlayersScreenEnabled;
     }
 
-    private JComboBox<Player> getPlayerList() {
-        return playerList;
+    private JComboBox<User> getUserList() {
+        return userList;
     }
 
     public JFrame getFrame() {
@@ -104,12 +100,12 @@ public class Gui {
         return buttons[i];
     }
 
-    public Player getPlayer() {
-        return player;
+    public User getUser() {
+        return user;
     }
 
-    public synchronized void setPlayer(Player player) {
-        this.player = player;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Draw getDraw() {
@@ -201,7 +197,7 @@ public class Gui {
         this.placeBtn();
     }
 
-    public synchronized void renderListPlayersResponse(ListPlayersResponse response){
+    public synchronized void renderListUsersResponse(ListUsersResponse response){
         logger.debug("rendering ListPlayersResponse");
         if (!isListPlayersScreenEnabled()) {
             logger.debug("instantiating all UI-Objects for ListPlayersResponse once");
@@ -209,22 +205,22 @@ public class Gui {
             //render refresh button
             JButton refreshListButton = new JButton("Aktualisiere Liste");
             refreshListButton.addActionListener(e -> {
-                ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
-                Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
+                ListUsersAction listUsersAction = new ListUsersAction(getUser());
+                Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listUsersAction, getOutputStream()));
                 socketWriter.start();
-                logger.debug("sending ListPlayersAction");
+                logger.debug("sending ListUsersAction");
             });
             refreshListButton.setPreferredSize(new Dimension(200, 50));
             getFrame().add(refreshListButton);
 
             //render player list
-            getPlayerList().setPreferredSize(new Dimension(300, 50));
-            getFrame().add(getPlayerList());
+            getUserList().setPreferredSize(new Dimension(300, 50));
+            getFrame().add(getUserList());
 
             //render connect button
             JButton connectButton = new JButton("Anfrage senden");
             connectButton.addActionListener(e -> {
-                ConnectAction connectAction = new ConnectAction(getPlayer(), (Player) getPlayerList().getSelectedItem());
+                ConnectAction connectAction = new ConnectAction(getUser(), (User) getUserList().getSelectedItem());
                 Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
                 socketWriter.start();
                 logger.debug("sending ConnectAction");
@@ -237,13 +233,13 @@ public class Gui {
         }
 
         //if Player Screen is already enabled refresh ComboBox
-        getPlayerList().removeAllItems();
-        if (response.getPlayers().isEmpty()){
+        getUserList().removeAllItems();
+        if (response.getUsers().isEmpty()){
             JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in später zu aktualisieren.");
-            getPlayerList().addItem(null);
+            getUserList().addItem(null);
         } else {
-            for (Player player : response.getPlayers()){
-                getPlayerList().addItem(player);
+            for (User user : response.getUsers()){
+                getUserList().addItem(user);
             }
         }
     }
@@ -257,16 +253,30 @@ public class Gui {
         socketReader.start();
     }
 
-    private synchronized void readNameAndSendInitialAction() {
-        String name = null;
+    public void loginFailedAction(String message){
+        JOptionPane.showMessageDialog(getFrame() ,message);
+    }
 
-        while (name == null || name.equals("")) {
-            name = JOptionPane.showInputDialog(getFrame(), "Enter username for Player 1!");
+    public synchronized void readNameAndSendInitialAction() {
+        JTextField username = new JTextField(15);
+        JTextField password = new JTextField(15);
+        JCheckBox register = new JCheckBox();
+
+        JPanel registration = new JPanel(new GridLayout(0, 2));
+        registration.add(new JLabel("Username"));
+        registration.add(username);
+        registration.add(new JLabel("Passwort"));
+        registration.add(password);
+        registration.add(new JLabel("Erste Registrierung?"));
+        registration.add(register);
+        int result = -1;
+        while (result != 0) {
+            result = JOptionPane.showConfirmDialog(getFrame(), registration, "Einloggen oder Registrieren", JOptionPane.OK_CANCEL_OPTION);
         }
-        InitialAction initialAction = new InitialAction(name);
+        RegisterLoginUserAction loginUserAction = new RegisterLoginUserAction(username.getText(), password.getText(), register.isSelected());
 
         //send message in new thread, this thread also handles the synchronisation of the output stream
-        Thread socketWriter = new Thread(new SocketWriter(getWriterLock(),initialAction,getOutputStream()));
+        Thread socketWriter = new Thread(new SocketWriter(getWriterLock(),loginUserAction,getOutputStream()));
         socketWriter.start();
         logger.debug("Initial Action was sent to server");
     }
@@ -278,7 +288,7 @@ public class Gui {
 
         if (!isGameScreenEnabled()) {
             logger.debug("instantiating all UI Objects for game screen once");
-            getFrame().setTitle(getPlayer() + " spielt Muehle gegen " + getOpposingPlayer());
+            getFrame().setTitle(getUser() + " spielt Muehle gegen " + getOpposingUser());
 
             getFrame().getContentPane().removeAll();
 
@@ -306,7 +316,7 @@ public class Gui {
             //if Player wins Game show Popup window to close client/return to main menu
             if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON) || getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
                 Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
-                int result = JOptionPane.showOptionDialog(getFrame(), getWinningPlayer() + " hat gewonnen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+                int result = JOptionPane.showOptionDialog(getFrame(), getWinningUser() + " hat gewonnen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
                 renderPopupReturnCloseDialog(result);
             }
             getDraw().repaint();
@@ -318,7 +328,7 @@ public class Gui {
         JButton endSession = new JButton("Spiel Beenden");
         endSession.setBounds(770, 650, 200, 50);
         endSession.addActionListener(e -> {
-            EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
+            EndSessionAction endSessionAction = new EndSessionAction(getUser());
             Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
             endSessionWriter.start();
             logger.debug("sending EndSessionAction");
@@ -326,16 +336,16 @@ public class Gui {
         getFrame().add(endSession);
     }
 
-    public synchronized void renderEndSessionResponse(EndSessionResponse response){
+    public synchronized void renderEndGameResponse(EndGameResponse response){
         if (!isListPlayersScreenEnabled()) {
             logger.debug("rendering EndSessionResponse");
-            if (!response.getMessage().contains(getPlayer().toString())) {
+            if (!response.getMessage().contains(getUser().toString())) {
                 JOptionPane.showMessageDialog(getFrame(), response.getMessage());
             }
-            getFrame().setTitle(getPlayer() + " spielt Muehle");
+            getFrame().setTitle(getUser() + " spielt Muehle");
             getFrame().getContentPane().removeAll();
             getFrame().repaint();
-            ListPlayersAction listPlayersAction = new ListPlayersAction(getPlayer());
+            ListUsersAction listPlayersAction = new ListUsersAction(getUser());
             Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
             listPlayerWriter.start();
             logger.debug("sending ListPlayersAction");
@@ -353,26 +363,32 @@ public class Gui {
         return getLastGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
     }
 
-    public Player getOpposingPlayer(){
-        if (getLastGameResponse().getNextPlayerToMove().equals(getPlayer())){
-            return getLastGameResponse().getOtherPlayer();
-        } else return getLastGameResponse().getNextPlayerToMove();
+    public User getOpposingUser(){
+        if (getLastGameResponse().getNextPlayerToMove().getUser().equals(getUser())){
+            return getLastGameResponse().getOtherPlayer().getUser();
+        } else return getLastGameResponse().getNextPlayerToMove().getUser();
     }
 
-    public Player getWinningPlayer(){
+    public User getWinningUser(){
         if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON)){
-            return getLastGameResponse().getNextPlayerToMove();
+            return getLastGameResponse().getNextPlayerToMove().getUser();
         } else if (getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
-            return getLastGameResponse().getOtherPlayer();
+            return getLastGameResponse().getOtherPlayer().getUser();
         }else{
             return null;
         }
     }
 
+    public Player getPlayerFromUser(User user){
+        if (getLastGameResponse().getNextPlayerToMove().getUser().equals(user)){
+            return getLastGameResponse().getNextPlayerToMove();
+        }else return getLastGameResponse().getOtherPlayer();
+    }
+
     private synchronized void renderPopupReturnCloseDialog(int result){
         //handle input of the win game/disconnect popup
         if (result == JOptionPane.YES_OPTION){
-            EndSessionAction endSessionAction = new EndSessionAction(getPlayer());
+            EndSessionAction endSessionAction = new EndSessionAction(getUser());
             Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
             endSessionWriter.start();
             logger.debug("sending EndSessionAction");

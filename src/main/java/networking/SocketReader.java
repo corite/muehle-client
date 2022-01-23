@@ -36,21 +36,21 @@ public class SocketReader implements Runnable {
 
                     Object inputObject = ois.readObject();
                     //todo: implement connect action
-                    if (inputObject instanceof InitialResponse) {
-                        handleInitialResponse((InitialResponse) inputObject);
-                    } else if (inputObject instanceof ListPlayersResponse) {
-                        handleListPlayersResponse((ListPlayersResponse) inputObject);
+                    if (inputObject instanceof RegisterLoginUserResponse) {
+                        handleRegisterLoginUserResponse((RegisterLoginUserResponse) inputObject);
+                    } else if (inputObject instanceof ListUsersResponse) {
+                        handleListUsersResponse((ListUsersResponse) inputObject);
                     } else if (inputObject instanceof GameResponse) {
                         handleGameResponse((GameResponse) inputObject);
-                    } else if (inputObject instanceof EndSessionResponse) {
-                        handleEndSessionResponse((EndSessionResponse) inputObject);
+                    } else if (inputObject instanceof EndGameResponse) {
+                        handleEndGameResponse((EndGameResponse) inputObject);
                     } else if (inputObject instanceof DisconnectResponse){
                         handleDisconnectResponse((DisconnectResponse) inputObject);
                     } else throw new ClassNotFoundException("Read input object not supported");
                 } catch (IOException e) {
                     logger.error("the connection was closed, trying to Reconnect", e);
                     synchronized (getGui()){
-                        ReconnectAction reconnectAction = new ReconnectAction(getGui().getPlayer());
+                        ReconnectAction reconnectAction = new ReconnectAction(getGui().getPlayerFromUser(getGui().getUser()));
                         Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), reconnectAction, getGui().getOutputStream()));
                         try {
                             Thread.sleep(2000);
@@ -73,18 +73,23 @@ public class SocketReader implements Runnable {
         }
     }
 
-    private void handleInitialResponse(InitialResponse response) {
-        getGui().setPlayer(response.getSelf());
-        getGui().getFrame().setTitle(getGui().getPlayer() + " spielt Muehle");
+    private void handleRegisterLoginUserResponse(RegisterLoginUserResponse response) {
+        if (!response.wasSuccessful()){
+            getGui().loginFailedAction(response.getMessage());
+            getGui().readNameAndSendInitialAction();
+        } else {
+            getGui().setUser(response.getUser());
+            getGui().getFrame().setTitle(getGui().getUser().getName() + " spielt Muehle");
 
 
-        ListPlayersAction listPlayersAction = new ListPlayersAction(response.getSelf());
-        Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(),listPlayersAction,getGui().getOutputStream()));
-        socketWriter.start();
+            ListUsersAction listPlayersAction = new ListUsersAction(response.getUser());
+            Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), listPlayersAction, getGui().getOutputStream()));
+            socketWriter.start();
+        }
     }
 
-    private void handleListPlayersResponse(ListPlayersResponse response) {
-        getGui().renderListPlayersResponse(response);
+    private void handleListUsersResponse(ListUsersResponse response) {
+        getGui().renderListUsersResponse(response);
     }
 
     private void handleGameResponse(GameResponse response) {
@@ -93,8 +98,8 @@ public class SocketReader implements Runnable {
         getGui().renderGameResponse(response);
     }
 
-    private void handleEndSessionResponse(EndSessionResponse response){
-        getGui().renderEndSessionResponse(response);
+    private void handleEndGameResponse(EndGameResponse response){
+        getGui().renderEndGameResponse(response);
     }
 
     private void handleDisconnectResponse(DisconnectResponse response){
