@@ -160,7 +160,7 @@ public class Gui {
     private void createFrame(){
         getFrame().setBounds(0, 0, 1000, 750);
         getFrame().setLayout(new FlowLayout());
-        getFrame().getContentPane().setBackground(Color.decode("#FFF4E6"));
+        getFrame().getContentPane().setBackground(Color.decode("#2b2b2b"));
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().setVisible(true);
         getFrame().setResizable(false);
@@ -259,7 +259,7 @@ public class Gui {
 
     public synchronized void readNameAndSendInitialAction() {
         JTextField username = new JTextField(15);
-        JTextField password = new JPasswordField(15);
+        JPasswordField password = new JPasswordField(15);
         JCheckBox register = new JCheckBox();
 
         JPanel registration = new JPanel(new GridLayout(0, 2));
@@ -273,7 +273,7 @@ public class Gui {
         while (result != 0) {
             result = JOptionPane.showConfirmDialog(getFrame(), registration, "Einloggen oder Registrieren", JOptionPane.OK_CANCEL_OPTION);
         }
-        RegisterLoginUserAction loginUserAction = new RegisterLoginUserAction(username.getText(), password.getText(), register.isSelected());
+        RegisterLoginUserAction loginUserAction = new RegisterLoginUserAction(username.getText(), new String(password.getPassword()), register.isSelected());
 
         //send message in new thread, this thread also handles the synchronisation of the output stream
         Thread socketWriter = new Thread(new SocketWriter(getWriterLock(),loginUserAction,getOutputStream()));
