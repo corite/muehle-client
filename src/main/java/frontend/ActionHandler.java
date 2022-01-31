@@ -28,13 +28,13 @@ public class ActionHandler implements ActionListener {
     @Override
     public synchronized void actionPerformed(ActionEvent e) {
         if (getGui().getLastGameResponse().getNextPlayerToMove().getUser().equals(getGui().getUser())){
-            if (e.getSource() instanceof Button button) {
+            if (e.getSource() instanceof GameButton gameButton) {
                 Draw draw = getGui().getDraw();
 
                 if (getGui().getLastGameResponse().getNextAction().equals(ActionType.TAKE)) {
 
                     //Sending Take Operation to Server if Action is Take
-                    GameAction gameAction = new GameAction(getGui().getPlayerFromUser(getGui().getUser()), ActionType.TAKE, button.getCoordinate());
+                    GameAction gameAction = new GameAction(getGui().getPlayerFromUser(getGui().getUser()), ActionType.TAKE, gameButton.getCoordinate());
                     Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), gameAction,getGui().getOutputStream()));
                     socketWriter.start();
 
@@ -42,7 +42,7 @@ public class ActionHandler implements ActionListener {
 
                     //Sending Place Operation to Server if Action is Place
 
-                    GameAction gameAction = new GameAction(getGui().getPlayerFromUser(getGui().getUser()), ActionType.PLACE, button.getCoordinate());
+                    GameAction gameAction = new GameAction(getGui().getPlayerFromUser(getGui().getUser()), ActionType.PLACE, gameButton.getCoordinate());
                     Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), gameAction,getGui().getOutputStream()));
                     socketWriter.start();
 
@@ -50,13 +50,13 @@ public class ActionHandler implements ActionListener {
 
                     //Sending Move Operation to Server if Action is Move
 
-                    if ((getGui().getTmp() == null && !getGui().getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) || getGui().getTmp() != null && !getGui().getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)) {
+                    if ((getGui().getTmp() == null && !getGui().getPosition(gameButton.getCoordinate()).getStoneState().equals(StoneState.NONE)) || getGui().getTmp() != null && !getGui().getPosition(gameButton.getCoordinate()).getStoneState().equals(StoneState.NONE)) {
 
-                        getGui().setTmp(button);
-                        logger.debug("set tmp stone at coordinate " + button.getCoordinate());
+                        getGui().setTmp(gameButton);
+                        logger.debug("set tmp stone at coordinate " + gameButton.getCoordinate());
 
-                    } else if (getGui().getTmp() != null && getGui().getPosition(button.getCoordinate()).getStoneState().equals(StoneState.NONE)){
-                        GameAction gameAction = new GameAction(getGui().getPlayerFromUser(getGui().getUser()), ActionType.MOVE, getGui().getTmp().getCoordinate(), button.getCoordinate());
+                    } else if (getGui().getTmp() != null && getGui().getPosition(gameButton.getCoordinate()).getStoneState().equals(StoneState.NONE)){
+                        GameAction gameAction = new GameAction(getGui().getPlayerFromUser(getGui().getUser()), ActionType.MOVE, getGui().getTmp().getCoordinate(), gameButton.getCoordinate());
                         Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), gameAction,getGui().getOutputStream()));
                         socketWriter.start();
 

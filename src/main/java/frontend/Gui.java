@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -22,8 +24,8 @@ public class Gui {
     private final JComboBox<User> userList = new JComboBox<>();
     private final Draw draw = new Draw(this);
     private final JFrame frame = new JFrame("Muehle");
-    private final Button[] buttons = new Button[24];
-    private Button tmp = null;
+    private final GameButton[] gameButtons = new GameButton[24];
+    private GameButton tmp = null;
 
     private User user = null;
     private GameResponse lastGameResponse;
@@ -34,7 +36,9 @@ public class Gui {
     private boolean isListPlayersScreenEnabled;
     private boolean isGameScreenEnabled;
 
-
+    private final Color frameColor = Color.decode("#3d3e41");
+    private final Color buttonColor = Color.decode("#2b2b2b");
+    private final Color buttonTextColor = Color.decode("#ffffff");
 
     public Gui() throws IOException {
 
@@ -80,8 +84,8 @@ public class Gui {
         return frame;
     }
 
-    private Button[] getButtons() {
-        return buttons;
+    private GameButton[] getGameButtons() {
+        return gameButtons;
     }
 
     public OutputStream getOutputStream() {
@@ -96,8 +100,8 @@ public class Gui {
         return writerLock;
     }
 
-    public Button getBtn(int i){
-        return buttons[i];
+    public GameButton getGameBtn(int i){
+        return gameButtons[i];
     }
 
     public User getUser() {
@@ -112,11 +116,11 @@ public class Gui {
         return draw;
     }
 
-    public Button getTmp() {
+    public GameButton getTmp() {
         return tmp;
     }
 
-    public void setTmp(Button tmp) {
+    public void setTmp(GameButton tmp) {
         this.tmp = tmp;
     }
 
@@ -128,39 +132,51 @@ public class Gui {
         this.isGameScreenEnabled = isGameScreenEnabled;
     }
 
+    public Color getFrameColor() {
+        return frameColor;
+    }
+
+    public Color getButtonColor() {
+        return buttonColor;
+    }
+
+    public Color getButtonTextColor() {
+        return buttonTextColor;
+    }
+
     //Button placement
 
     private void placeBtn() {
-        getButtons()[0].setBounds(50-20, 50-20, 40, 40);
-        getButtons()[1].setBounds(350-20, 50-20, 40, 40);
-        getButtons()[2].setBounds(650-20, 50-20, 40, 40);
-        getButtons()[3].setBounds(150-20, 150-20, 40, 40);
-        getButtons()[4].setBounds(350-20, 150-20, 40, 40);
-        getButtons()[5].setBounds(550-20, 150-20, 40, 40);
-        getButtons()[6].setBounds(250-20, 250-20, 40, 40);
-        getButtons()[7].setBounds(350-20, 250-20, 40, 40);
-        getButtons()[8].setBounds(450-20, 250-20, 40, 40);
-        getButtons()[9].setBounds(50-20, 350-20, 40, 40);
-        getButtons()[10].setBounds(150-20, 350-20, 40, 40);
-        getButtons()[11].setBounds(250-20, 350-20, 40, 40);
-        getButtons()[12].setBounds(450-20, 350-20, 40, 40);
-        getButtons()[13].setBounds(550-20, 350-20, 40, 40);
-        getButtons()[14].setBounds(650-20, 350-20, 40, 40);
-        getButtons()[15].setBounds(250-20, 450-20, 40, 40);
-        getButtons()[16].setBounds(350-20, 450-20, 40, 40);
-        getButtons()[17].setBounds(450-20, 450-20, 40, 40);
-        getButtons()[18].setBounds(150-20, 550-20, 40, 40);
-        getButtons()[19].setBounds(350-20, 550-20, 40, 40);
-        getButtons()[20].setBounds(550-20, 550-20, 40, 40);
-        getButtons()[21].setBounds(50-20, 650-20, 40, 40);
-        getButtons()[22].setBounds(350-20, 650-20, 40, 40);
-        getButtons()[23].setBounds(650-20, 650-20, 40, 40);
+        getGameButtons()[0].setBounds(50-20, 50-20, 40, 40);
+        getGameButtons()[1].setBounds(350-20, 50-20, 40, 40);
+        getGameButtons()[2].setBounds(650-20, 50-20, 40, 40);
+        getGameButtons()[3].setBounds(150-20, 150-20, 40, 40);
+        getGameButtons()[4].setBounds(350-20, 150-20, 40, 40);
+        getGameButtons()[5].setBounds(550-20, 150-20, 40, 40);
+        getGameButtons()[6].setBounds(250-20, 250-20, 40, 40);
+        getGameButtons()[7].setBounds(350-20, 250-20, 40, 40);
+        getGameButtons()[8].setBounds(450-20, 250-20, 40, 40);
+        getGameButtons()[9].setBounds(50-20, 350-20, 40, 40);
+        getGameButtons()[10].setBounds(150-20, 350-20, 40, 40);
+        getGameButtons()[11].setBounds(250-20, 350-20, 40, 40);
+        getGameButtons()[12].setBounds(450-20, 350-20, 40, 40);
+        getGameButtons()[13].setBounds(550-20, 350-20, 40, 40);
+        getGameButtons()[14].setBounds(650-20, 350-20, 40, 40);
+        getGameButtons()[15].setBounds(250-20, 450-20, 40, 40);
+        getGameButtons()[16].setBounds(350-20, 450-20, 40, 40);
+        getGameButtons()[17].setBounds(450-20, 450-20, 40, 40);
+        getGameButtons()[18].setBounds(150-20, 550-20, 40, 40);
+        getGameButtons()[19].setBounds(350-20, 550-20, 40, 40);
+        getGameButtons()[20].setBounds(550-20, 550-20, 40, 40);
+        getGameButtons()[21].setBounds(50-20, 650-20, 40, 40);
+        getGameButtons()[22].setBounds(350-20, 650-20, 40, 40);
+        getGameButtons()[23].setBounds(650-20, 650-20, 40, 40);
     }
 
     private void createFrame(){
         getFrame().setBounds(0, 0, 1000, 750);
         getFrame().setLayout(new FlowLayout());
-        getFrame().getContentPane().setBackground(Color.decode("#2b2b2b"));
+        getFrame().getContentPane().setBackground(getFrameColor());
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().setVisible(true);
         getFrame().setResizable(false);
@@ -173,14 +189,14 @@ public class Gui {
     }
 
     private void createButton(int i){
-        getButtons()[i].setVisible(true);
+        getGameButtons()[i].setVisible(true);
 
-        getButtons()[i].addActionListener(new ActionHandler(this));
+        getGameButtons()[i].addActionListener(new ActionHandler(this));
 
-        getButtons()[i].setFocusPainted(false);
-        getButtons()[i].setContentAreaFilled(false);
-        getButtons()[i].setBorder(null);
-        getFrame().add(getButtons()[i]);
+        getGameButtons()[i].setFocusPainted(false);
+        getGameButtons()[i].setContentAreaFilled(false);
+        getGameButtons()[i].setBorder(null);
+        getFrame().add(getGameButtons()[i]);
     }
 
     private void createButtons(){
@@ -190,8 +206,8 @@ public class Gui {
                 //sorts the collection so that the nodes can be traversed row by row from top to bottom
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        for (int i=0; i< getButtons().length; i++){
-            getButtons()[i] = new Button(coordinates.get(i));
+        for (int i = 0; i< getGameButtons().length; i++){
+            getGameButtons()[i] = new GameButton(coordinates.get(i));
             this.createButton(i);
         }
         this.placeBtn();
@@ -202,8 +218,10 @@ public class Gui {
         if (!isListPlayersScreenEnabled()) {
             logger.debug("instantiating all UI-Objects for ListPlayersResponse once");
 
+            getFrame().setLayout(new FlowLayout());
+
             //render refresh button
-            JButton refreshListButton = new JButton("Aktualisiere Liste");
+            GuiButton refreshListButton = new GuiButton("Aktualisiere Liste");
             refreshListButton.addActionListener(e -> {
                 ListUsersAction listUsersAction = new ListUsersAction(getUser());
                 Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listUsersAction, getOutputStream()));
@@ -211,21 +229,38 @@ public class Gui {
                 logger.debug("sending ListUsersAction");
             });
             refreshListButton.setPreferredSize(new Dimension(200, 50));
+            refreshListButton.setBackground(getButtonColor());
+            refreshListButton.setForeground(getButtonTextColor());
+            refreshListButton.setHoverBackgroundColor(getFrameColor());
+            refreshListButton.setPressedBackgroundColor(getFrameColor());
+            refreshListButton.setFocusPainted(false);
             getFrame().add(refreshListButton);
 
             //render player list
             getUserList().setPreferredSize(new Dimension(300, 50));
+            getUserList().setEditable(true);
+            getUserList().getEditor().getEditorComponent().setBackground(getButtonColor());
+            getUserList().getEditor().getEditorComponent().setForeground(getButtonTextColor());
             getFrame().add(getUserList());
 
             //render connect button
-            JButton connectButton = new JButton("Anfrage senden");
+            GuiButton connectButton = new GuiButton("Anfrage senden");
             connectButton.addActionListener(e -> {
-                ConnectAction connectAction = new ConnectAction(getUser(), (User) getUserList().getSelectedItem());
-                Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
-                socketWriter.start();
-                logger.debug("sending ConnectAction");
+                if (getUserList().getSelectedItem() == null){
+                    JOptionPane.showMessageDialog(getFrame(), "Bitte waehle einen Spieler aus der Liste aus!");
+                } else {
+                    ConnectAction connectAction = new ConnectAction(getUser(), (User) getUserList().getSelectedItem());
+                    Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
+                    socketWriter.start();
+                    logger.debug("sending ConnectAction");
+                }
             });
             connectButton.setPreferredSize(new Dimension(200, 50));
+            connectButton.setBackground(getButtonColor());
+            connectButton.setForeground(getButtonTextColor());
+            connectButton.setPressedBackgroundColor(getFrameColor());
+            connectButton.setHoverBackgroundColor(getFrameColor());
+            connectButton.setFocusPainted(false);
             getFrame().add(connectButton);
 
             setListPlayersScreenEnabled(true);
@@ -235,7 +270,7 @@ public class Gui {
         //if Player Screen is already enabled refresh ComboBox
         getUserList().removeAllItems();
         if (response.getUsers().isEmpty()){
-            JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in später zu aktualisieren.");
+            JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in spaeter zu aktualisieren.");
             getUserList().addItem(null);
         } else {
             for (User user : response.getUsers()){
@@ -243,6 +278,22 @@ public class Gui {
             }
         }
     }
+
+    public synchronized void renderRegisterLoginUserResponse(RegisterLoginUserResponse response){
+        if (!response.wasSuccessful()){
+            loginFailedAction(response.getMessage());
+            readNameAndSendInitialAction();
+        } else {
+            setUser(response.getUser());
+            getFrame().setTitle(getUser().getName() + " spielt Muehle");
+
+
+            ListUsersAction listPlayersAction = new ListUsersAction(response.getUser());
+            Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
+            socketWriter.start();
+        }
+    }
+
 
     private void establishConnectionWithServer() throws IOException{
         Socket socket = new Socket("localhost", 5056);
@@ -292,6 +343,8 @@ public class Gui {
 
             getFrame().getContentPane().removeAll();
 
+            getFrame().setLayout(null);
+
             // create Buttons only possible, after GameResponse was received
 
             this.createButtons();
@@ -302,11 +355,11 @@ public class Gui {
 
             getFrame().add(getDraw());
 
-            for (int i = 0; i < getButtons().length; i++) {
-                getFrame().add(getBtn(i));
+            for (int i = 0; i < getGameButtons().length; i++) {
+                getFrame().add(getGameBtn(i));
             }
 
-            placeEndSessionButton();
+            placeEndGameButton();
 
             getFrame().repaint();
             setGameScreenEnabled(true);
@@ -324,21 +377,27 @@ public class Gui {
 
     }
 
-    private synchronized void placeEndSessionButton(){
-        JButton endSession = new JButton("Spiel Beenden");
-        endSession.setBounds(770, 650, 200, 50);
-        endSession.addActionListener(e -> {
-            EndSessionAction endSessionAction = new EndSessionAction(getUser());
-            Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
-            endSessionWriter.start();
-            logger.debug("sending EndSessionAction");
+    private synchronized void placeEndGameButton(){
+        GuiButton endGame = new GuiButton("Spiel Beenden");
+        endGame.setBounds(770, 650, 200, 50);
+        endGame.addActionListener(e -> {
+            EndGameAction endGameAction = new EndGameAction(getPlayerFromUser(getUser()));
+            Thread endGameWriter = new Thread(new SocketWriter(getWriterLock(), endGameAction, getOutputStream()));
+            endGameWriter.start();
+            logger.debug("sending EndGameAction");
         });
-        getFrame().add(endSession);
+        endGame.setBackground(getButtonColor());
+        endGame.setForeground(getButtonTextColor());
+        endGame.setFocusPainted(false);
+        endGame.setHoverBackgroundColor(getFrameColor());
+        endGame.setPressedBackgroundColor(getFrameColor());
+
+        getFrame().add(endGame);
     }
 
     public synchronized void renderEndGameResponse(EndGameResponse response){
         if (!isListPlayersScreenEnabled()) {
-            logger.debug("rendering EndSessionResponse");
+            logger.debug("rendering EndGameResponse");
             if (!response.getMessage().contains(getUser().toString())) {
                 JOptionPane.showMessageDialog(getFrame(), response.getMessage());
             }
@@ -388,13 +447,15 @@ public class Gui {
     private synchronized void renderPopupReturnCloseDialog(int result){
         //handle input of the win game/disconnect popup
         if (result == JOptionPane.YES_OPTION){
-            EndSessionAction endSessionAction = new EndSessionAction(getUser());
-            Thread endSessionWriter = new Thread(new SocketWriter(getWriterLock(), endSessionAction, getOutputStream()));
-            endSessionWriter.start();
-            logger.debug("sending EndSessionAction");
+            EndGameAction endGameAction = new EndGameAction(getPlayerFromUser(getUser()));
+            Thread endGameWriter = new Thread(new SocketWriter(getWriterLock(), endGameAction, getOutputStream()));
+            endGameWriter.start();
+            logger.debug("sending EndGameAction");
         } else if (result == JOptionPane.NO_OPTION){
             System.exit(0);
         }
     }
-
+//todo Frage: EndGameResponse wird nur an den anderen User geschickt, also bei abschickendem User selbst beenden?
+//todo maybe change colors at all again
+//todo change rim color of buttons??
 }

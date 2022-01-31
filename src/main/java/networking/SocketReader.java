@@ -74,18 +74,7 @@ public class SocketReader implements Runnable {
     }
 
     private void handleRegisterLoginUserResponse(RegisterLoginUserResponse response) {
-        if (!response.wasSuccessful()){
-            getGui().loginFailedAction(response.getMessage());
-            getGui().readNameAndSendInitialAction();
-        } else {
-            getGui().setUser(response.getUser());
-            getGui().getFrame().setTitle(getGui().getUser().getName() + " spielt Muehle");
-
-
-            ListUsersAction listPlayersAction = new ListUsersAction(response.getUser());
-            Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), listPlayersAction, getGui().getOutputStream()));
-            socketWriter.start();
-        }
+        getGui().renderRegisterLoginUserResponse(response);
     }
 
     private void handleListUsersResponse(ListUsersResponse response) {

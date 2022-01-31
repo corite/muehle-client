@@ -82,17 +82,17 @@ public class Draw extends JLabel {
         //iterate through all Buttons
 
         for (int i=0; i<=23;i++){
-            if (getGui().getBtn(i) != null) {
+            if (getGui().getGameBtn(i) != null) {
 
                 //draw Stones on Button Coordinates
 
-                if (!getGui().getPosition(getGui().getBtn(i).getCoordinate()).getStoneState().equals(StoneState.NONE)) {
-                    Color btnColor = getColor(getGui().getPosition(getGui().getBtn(i).getCoordinate()).getStoneState());
+                if (!getGui().getPosition(getGui().getGameBtn(i).getCoordinate()).getStoneState().equals(StoneState.NONE)) {
+                    Color btnColor = getColor(getGui().getPosition(getGui().getGameBtn(i).getCoordinate()).getStoneState());
                     g.setColor(btnColor);
-                    g.fillOval(getGui().getBtn(i).getX(), getGui().getBtn(i).getY(), 40, 40);
+                    g.fillOval(getGui().getGameBtn(i).getX(), getGui().getGameBtn(i).getY(), 40, 40);
                     g.setColor(getOtherColor(btnColor));
-                    g.drawOval(getGui().getBtn(i).getX() + 5, getGui().getBtn(i).getY() + 5, 30, 30);
-                    g.drawOval(getGui().getBtn(i).getX() + 10, getGui().getBtn(i).getY() + 10, 20, 20);
+                    g.drawOval(getGui().getGameBtn(i).getX() + 5, getGui().getGameBtn(i).getY() + 5, 30, 30);
+                    g.drawOval(getGui().getGameBtn(i).getX() + 10, getGui().getGameBtn(i).getY() + 10, 20, 20);
                     if (Color.BLACK.equals(btnColor)) {
                         g.setColor(Color.BLACK);
                     }

@@ -3,10 +3,10 @@ package frontend;
 import logic.entities.Coordinate;
 import javax.swing.*;
 
-public class Button extends JButton {
+public class GameButton extends JButton {
     private final Coordinate coordinate;
 
-    public Button(Coordinate coordinate) {
+    public GameButton(Coordinate coordinate) {
         this.coordinate = coordinate;
     }
 
