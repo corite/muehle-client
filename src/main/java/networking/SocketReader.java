@@ -48,17 +48,7 @@ public class SocketReader implements Runnable {
                         handleDisconnectResponse((DisconnectResponse) inputObject);
                     } else throw new ClassNotFoundException("Read input object not supported");
                 } catch (IOException e) {
-                    logger.error("the connection was closed, trying to Reconnect", e);
-                    synchronized (getGui()){
-                        ReconnectAction reconnectAction = new ReconnectAction(getGui().getPlayerFromUser(getGui().getUser()));
-                        Thread socketWriter = new Thread(new SocketWriter(getGui().getWriterLock(), reconnectAction, getGui().getOutputStream()));
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException ex) {
-                            logger.error("Thread was interrupted while trying to perform sleep", ex);
-                        }
-                        socketWriter.start();
-                    }
+                    logger.error("the connection was closed", e);
                 }
             }
         } catch (ClassNotFoundException e) {
