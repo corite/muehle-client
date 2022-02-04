@@ -26,6 +26,7 @@ public class Gui {
     private final JFrame frame = new JFrame("Muehle");
     private final GameButton[] gameButtons = new GameButton[24];
     private GameButton tmp = null;
+    private final UIManager UI = new UIManager();
 
     private User user = null;
     private GameResponse lastGameResponse;
@@ -63,9 +64,9 @@ public class Gui {
 
     public void setLastGameResponse(GameResponse lastGameResponse) {
         this.lastGameResponse = lastGameResponse;
-        if (getUser().toString().equals(lastGameResponse.getNextPlayerToMove().getUser().toString())){
+        if (getUser().toString().equals(lastGameResponse.getNextPlayerToMove().getUser().toString())) {
             setUser(lastGameResponse.getNextPlayerToMove().getUser());
-        }else setUser(lastGameResponse.getOtherPlayer().getUser());
+        } else setUser(lastGameResponse.getOtherPlayer().getUser());
     }
 
     private boolean isListPlayersScreenEnabled() {
@@ -100,7 +101,7 @@ public class Gui {
         return writerLock;
     }
 
-    public GameButton getGameBtn(int i){
+    public GameButton getGameBtn(int i) {
         return gameButtons[i];
     }
 
@@ -144,51 +145,56 @@ public class Gui {
         return buttonTextColor;
     }
 
+    public UIManager getUI() {
+        return UI;
+    }
+
     //Button placement
 
     private void placeBtn() {
-        getGameButtons()[0].setBounds(50-20, 50-20, 40, 40);
-        getGameButtons()[1].setBounds(350-20, 50-20, 40, 40);
-        getGameButtons()[2].setBounds(650-20, 50-20, 40, 40);
-        getGameButtons()[3].setBounds(150-20, 150-20, 40, 40);
-        getGameButtons()[4].setBounds(350-20, 150-20, 40, 40);
-        getGameButtons()[5].setBounds(550-20, 150-20, 40, 40);
-        getGameButtons()[6].setBounds(250-20, 250-20, 40, 40);
-        getGameButtons()[7].setBounds(350-20, 250-20, 40, 40);
-        getGameButtons()[8].setBounds(450-20, 250-20, 40, 40);
-        getGameButtons()[9].setBounds(50-20, 350-20, 40, 40);
-        getGameButtons()[10].setBounds(150-20, 350-20, 40, 40);
-        getGameButtons()[11].setBounds(250-20, 350-20, 40, 40);
-        getGameButtons()[12].setBounds(450-20, 350-20, 40, 40);
-        getGameButtons()[13].setBounds(550-20, 350-20, 40, 40);
-        getGameButtons()[14].setBounds(650-20, 350-20, 40, 40);
-        getGameButtons()[15].setBounds(250-20, 450-20, 40, 40);
-        getGameButtons()[16].setBounds(350-20, 450-20, 40, 40);
-        getGameButtons()[17].setBounds(450-20, 450-20, 40, 40);
-        getGameButtons()[18].setBounds(150-20, 550-20, 40, 40);
-        getGameButtons()[19].setBounds(350-20, 550-20, 40, 40);
-        getGameButtons()[20].setBounds(550-20, 550-20, 40, 40);
-        getGameButtons()[21].setBounds(50-20, 650-20, 40, 40);
-        getGameButtons()[22].setBounds(350-20, 650-20, 40, 40);
-        getGameButtons()[23].setBounds(650-20, 650-20, 40, 40);
+        getGameButtons()[0].setBounds(50 - 20, 50 - 20, 40, 40);
+        getGameButtons()[1].setBounds(350 - 20, 50 - 20, 40, 40);
+        getGameButtons()[2].setBounds(650 - 20, 50 - 20, 40, 40);
+        getGameButtons()[3].setBounds(150 - 20, 150 - 20, 40, 40);
+        getGameButtons()[4].setBounds(350 - 20, 150 - 20, 40, 40);
+        getGameButtons()[5].setBounds(550 - 20, 150 - 20, 40, 40);
+        getGameButtons()[6].setBounds(250 - 20, 250 - 20, 40, 40);
+        getGameButtons()[7].setBounds(350 - 20, 250 - 20, 40, 40);
+        getGameButtons()[8].setBounds(450 - 20, 250 - 20, 40, 40);
+        getGameButtons()[9].setBounds(50 - 20, 350 - 20, 40, 40);
+        getGameButtons()[10].setBounds(150 - 20, 350 - 20, 40, 40);
+        getGameButtons()[11].setBounds(250 - 20, 350 - 20, 40, 40);
+        getGameButtons()[12].setBounds(450 - 20, 350 - 20, 40, 40);
+        getGameButtons()[13].setBounds(550 - 20, 350 - 20, 40, 40);
+        getGameButtons()[14].setBounds(650 - 20, 350 - 20, 40, 40);
+        getGameButtons()[15].setBounds(250 - 20, 450 - 20, 40, 40);
+        getGameButtons()[16].setBounds(350 - 20, 450 - 20, 40, 40);
+        getGameButtons()[17].setBounds(450 - 20, 450 - 20, 40, 40);
+        getGameButtons()[18].setBounds(150 - 20, 550 - 20, 40, 40);
+        getGameButtons()[19].setBounds(350 - 20, 550 - 20, 40, 40);
+        getGameButtons()[20].setBounds(550 - 20, 550 - 20, 40, 40);
+        getGameButtons()[21].setBounds(50 - 20, 650 - 20, 40, 40);
+        getGameButtons()[22].setBounds(350 - 20, 650 - 20, 40, 40);
+        getGameButtons()[23].setBounds(650 - 20, 650 - 20, 40, 40);
     }
 
-    private void createFrame(){
+    private void createFrame() {
         getFrame().setBounds(0, 0, 1000, 750);
         getFrame().setLayout(new FlowLayout());
         getFrame().getContentPane().setBackground(getFrameColor());
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().setVisible(true);
         getFrame().setResizable(false);
+        initializeUIManager();
     }
 
-    private void createLabel(){
+    private void createLabel() {
         getDraw().setBounds(0, 0, 1000, 750);
         getDraw().setVisible(true);
         getDraw().repaint();
     }
 
-    private void createButton(int i){
+    private void createButton(int i) {
         getGameButtons()[i].setVisible(true);
 
         getGameButtons()[i].addActionListener(new ActionHandler(this));
@@ -199,21 +205,21 @@ public class Gui {
         getFrame().add(getGameButtons()[i]);
     }
 
-    private void createButtons(){
+    private void createButtons() {
         ArrayList<Coordinate> coordinates = getLastGameResponse().getGameField().stream()
                 .map(Position::getCoordinate)
                 .sorted(((o1, o2) -> o1.getY() == o2.getY() ? Integer.compare(o1.getX(), o2.getX()) : -Integer.compare(o1.getY(), o2.getY())))
                 //sorts the collection so that the nodes can be traversed row by row from top to bottom
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        for (int i = 0; i< getGameButtons().length; i++){
+        for (int i = 0; i < getGameButtons().length; i++) {
             getGameButtons()[i] = new GameButton(coordinates.get(i));
             this.createButton(i);
         }
         this.placeBtn();
     }
 
-    public synchronized void renderListUsersResponse(ListUsersResponse response){
+    public synchronized void renderListUsersResponse(ListUsersResponse response) {
         logger.debug("rendering ListPlayersResponse");
         if (!isListPlayersScreenEnabled()) {
             logger.debug("instantiating all UI-Objects for ListPlayersResponse once");
@@ -221,7 +227,7 @@ public class Gui {
             getFrame().setLayout(new FlowLayout());
 
             //render refresh button
-            GuiButton refreshListButton = new GuiButton("Aktualisiere Liste");
+            JButton refreshListButton = new JButton("Aktualisiere Liste");
             refreshListButton.addActionListener(e -> {
                 ListUsersAction listUsersAction = new ListUsersAction(getUser());
                 Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listUsersAction, getOutputStream()));
@@ -231,8 +237,6 @@ public class Gui {
             refreshListButton.setPreferredSize(new Dimension(200, 50));
             refreshListButton.setBackground(getButtonColor());
             refreshListButton.setForeground(getButtonTextColor());
-            refreshListButton.setHoverBackgroundColor(getFrameColor());
-            refreshListButton.setPressedBackgroundColor(getFrameColor());
             refreshListButton.setFocusPainted(false);
             getFrame().add(refreshListButton);
 
@@ -244,9 +248,9 @@ public class Gui {
             getFrame().add(getUserList());
 
             //render connect button
-            GuiButton connectButton = new GuiButton("Anfrage senden");
+            JButton connectButton = new JButton("Anfrage senden");
             connectButton.addActionListener(e -> {
-                if (getUserList().getSelectedItem() == null){
+                if (getUserList().getSelectedItem() == null) {
                     JOptionPane.showMessageDialog(getFrame(), "Bitte waehle einen Spieler aus der Liste aus!");
                 } else {
                     ConnectAction connectAction = new ConnectAction(getUser(), (User) getUserList().getSelectedItem());
@@ -258,8 +262,6 @@ public class Gui {
             connectButton.setPreferredSize(new Dimension(200, 50));
             connectButton.setBackground(getButtonColor());
             connectButton.setForeground(getButtonTextColor());
-            connectButton.setPressedBackgroundColor(getFrameColor());
-            connectButton.setHoverBackgroundColor(getFrameColor());
             connectButton.setFocusPainted(false);
             getFrame().add(connectButton);
 
@@ -269,18 +271,18 @@ public class Gui {
 
         //if Player Screen is already enabled refresh ComboBox
         getUserList().removeAllItems();
-        if (response.getUsers().isEmpty()){
+        if (response.getUsers().isEmpty()) {
             JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in spaeter zu aktualisieren.");
             getUserList().addItem(null);
         } else {
-            for (User user : response.getUsers()){
+            for (User user : response.getUsers()) {
                 getUserList().addItem(user);
             }
         }
     }
 
-    public synchronized void renderRegisterLoginUserResponse(RegisterLoginUserResponse response){
-        if (!response.wasSuccessful()){
+    public synchronized void renderRegisterLoginUserResponse(RegisterLoginUserResponse response) {
+        if (!response.wasSuccessful()) {
             loginFailedAction(response.getMessage());
             readNameAndSendInitialAction();
         } else {
@@ -295,7 +297,7 @@ public class Gui {
     }
 
 
-    private void establishConnectionWithServer() throws IOException{
+    private void establishConnectionWithServer() throws IOException {
         Socket socket = new Socket("localhost", 5056);
 
         this.setOutputStream(socket.getOutputStream());
@@ -304,30 +306,50 @@ public class Gui {
         socketReader.start();
     }
 
-    public void loginFailedAction(String message){
-        JOptionPane.showMessageDialog(getFrame() ,message);
+    public void loginFailedAction(String message) {
+        JOptionPane.showMessageDialog(getFrame(), message);
+    }
+
+    public void initializeUIManager(){
+        UIManager UI = new UIManager();
+        UI.put("OptionPane.background", getButtonColor());
+        UI.put("OptionPane.messageForeground", getButtonTextColor());
+        UI.put("Panel.background", getButtonColor());
+        UI.put("Button.background", getFrameColor());
+        UI.put("Button.foreground", getButtonTextColor());
     }
 
     public synchronized void readNameAndSendInitialAction() {
         JTextField username = new JTextField(15);
+        username.setBackground(getFrameColor());
+        username.setForeground(getButtonTextColor());
         JPasswordField password = new JPasswordField(15);
+        password.setBackground(getFrameColor());
+        password.setForeground(getButtonTextColor());
         JCheckBox register = new JCheckBox();
+        register.setBackground(getButtonColor());
 
         JPanel registration = new JPanel(new GridLayout(0, 2));
-        registration.add(new JLabel("Username"));
+        JLabel usernameText = new JLabel("Username");
+        usernameText.setForeground(getButtonTextColor());
+        registration.add(usernameText);
         registration.add(username);
-        registration.add(new JLabel("Passwort"));
+        JLabel passwordText = new JLabel("Passwort");
+        passwordText.setForeground(getButtonTextColor());
+        registration.add(passwordText);
         registration.add(password);
-        registration.add(new JLabel("Erste Registrierung?"));
+        JLabel registrationButton = new JLabel("Erste Registrierung?");
+        registrationButton.setForeground(getButtonTextColor());
+        registration.add(registrationButton);
         registration.add(register);
-        int result = -1;
-        while (result != 0) {
-            result = JOptionPane.showConfirmDialog(getFrame(), registration, "Einloggen oder Registrieren", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(getFrame(), registration, "Einloggen oder Registrieren", JOptionPane.OK_CANCEL_OPTION);
+        if (result != 0){
+            System.exit(0);
         }
         RegisterLoginUserAction loginUserAction = new RegisterLoginUserAction(username.getText(), new String(password.getPassword()), register.isSelected());
 
         //send message in new thread, this thread also handles the synchronisation of the output stream
-        Thread socketWriter = new Thread(new SocketWriter(getWriterLock(),loginUserAction,getOutputStream()));
+        Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), loginUserAction, getOutputStream()));
         socketWriter.start();
         logger.debug("Initial Action was sent to server");
     }
@@ -364,10 +386,9 @@ public class Gui {
             getFrame().repaint();
             setGameScreenEnabled(true);
             setListPlayersScreenEnabled(false);
-        }
-        else {
+        } else {
             //if Player wins Game show Popup window to close client/return to main menu
-            if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON) || getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
+            if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON) || getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)) {
                 Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
                 int result = JOptionPane.showOptionDialog(getFrame(), getWinningUser() + " hat gewonnen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
                 renderPopupReturnCloseDialog(result);
@@ -377,8 +398,8 @@ public class Gui {
 
     }
 
-    private synchronized void placeEndGameButton(){
-        GuiButton endGame = new GuiButton("Spiel Beenden");
+    private synchronized void placeEndGameButton() {
+        JButton endGame = new JButton("Spiel Beenden");
         endGame.setBounds(770, 650, 200, 50);
         endGame.addActionListener(e -> {
             EndGameAction endGameAction = new EndGameAction(getPlayerFromUser(getUser()));
@@ -389,13 +410,11 @@ public class Gui {
         endGame.setBackground(getButtonColor());
         endGame.setForeground(getButtonTextColor());
         endGame.setFocusPainted(false);
-        endGame.setHoverBackgroundColor(getFrameColor());
-        endGame.setPressedBackgroundColor(getFrameColor());
 
         getFrame().add(endGame);
     }
 
-    public synchronized void renderEndGameResponse(EndGameResponse response){
+    public synchronized void renderEndGameResponse(EndGameResponse response) {
         if (!isListPlayersScreenEnabled()) {
             logger.debug("rendering EndGameResponse");
             if (!response.getMessage().contains(getUser().toString())) {
@@ -411,51 +430,50 @@ public class Gui {
         }
     }
 
-    public synchronized void renderDisconnectResponse(DisconnectResponse response){
+    public synchronized void renderDisconnectResponse(DisconnectResponse response) {
         //if player disconnects from game show popup window to close client/return to main menu
         Object[] options = {"Zurueck zur Spielersuche", "Client schliessen"};
         int result = JOptionPane.showOptionDialog(getFrame(), response.getDisconnectedPlayer() + " hat das Spiel verlassen!", "Spiel wurde beendet", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
         renderPopupReturnCloseDialog(result);
     }
 
-    public Position getPosition(Coordinate coordinate){
+    public Position getPosition(Coordinate coordinate) {
         return getLastGameResponse().getGameField().stream().filter(p -> p.getCoordinate().equals(coordinate)).findFirst().get();
     }
 
-    public User getOpposingUser(){
-        if (getLastGameResponse().getNextPlayerToMove().getUser().equals(getUser())){
+    public User getOpposingUser() {
+        if (getLastGameResponse().getNextPlayerToMove().getUser().equals(getUser())) {
             return getLastGameResponse().getOtherPlayer().getUser();
         } else return getLastGameResponse().getNextPlayerToMove().getUser();
     }
 
-    public User getWinningUser(){
-        if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON)){
+    public User getWinningUser() {
+        if (getLastGameResponse().getNextPlayerToMove().getPhase().equals(GamePhase.WON)) {
             return getLastGameResponse().getNextPlayerToMove().getUser();
-        } else if (getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)){
+        } else if (getLastGameResponse().getOtherPlayer().getPhase().equals(GamePhase.WON)) {
             return getLastGameResponse().getOtherPlayer().getUser();
-        }else{
+        } else {
             return null;
         }
     }
 
-    public Player getPlayerFromUser(User user){
-        if (getLastGameResponse().getNextPlayerToMove().getUser().equals(user)){
+    public Player getPlayerFromUser(User user) {
+        if (getLastGameResponse().getNextPlayerToMove().getUser().equals(user)) {
             return getLastGameResponse().getNextPlayerToMove();
-        }else return getLastGameResponse().getOtherPlayer();
+        } else return getLastGameResponse().getOtherPlayer();
     }
 
-    private synchronized void renderPopupReturnCloseDialog(int result){
+    private synchronized void renderPopupReturnCloseDialog(int result) {
         //handle input of the win game/disconnect popup
-        if (result == JOptionPane.YES_OPTION){
+        if (result == JOptionPane.YES_OPTION) {
             EndGameAction endGameAction = new EndGameAction(getPlayerFromUser(getUser()));
             Thread endGameWriter = new Thread(new SocketWriter(getWriterLock(), endGameAction, getOutputStream()));
             endGameWriter.start();
             logger.debug("sending EndGameAction");
-        } else if (result == JOptionPane.NO_OPTION){
+        } else if (result == JOptionPane.NO_OPTION) {
             System.exit(0);
         }
     }
-//todo Frage: EndGameResponse wird nur an den anderen User geschickt, also bei abschickendem User selbst beenden?
-//todo maybe change colors at all again
-//todo change rim color of buttons??
 }
+//todo maybe change color of popup menus
+//todo maybe change button initialization into function
