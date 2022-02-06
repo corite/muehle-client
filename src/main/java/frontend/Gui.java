@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -21,13 +19,11 @@ public class Gui {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final JComboBox<User> userList = new JComboBox<>();
+    private final DefaultListModel<User> userList = new DefaultListModel<>();
     private final Draw draw = new Draw(this);
     private final JFrame frame = new JFrame("Muehle");
     private final GameButton[] gameButtons = new GameButton[24];
     private GameButton tmp = null;
-    private final UIManager UI = new UIManager();
-
     private User user = null;
     private GameResponse lastGameResponse;
 
@@ -75,10 +71,6 @@ public class Gui {
 
     private void setListPlayersScreenEnabled(boolean listPlayersScreenEnabled) {
         isListPlayersScreenEnabled = listPlayersScreenEnabled;
-    }
-
-    private JComboBox<User> getUserList() {
-        return userList;
     }
 
     public JFrame getFrame() {
@@ -145,8 +137,8 @@ public class Gui {
         return buttonTextColor;
     }
 
-    public UIManager getUI() {
-        return UI;
+    public DefaultListModel<User> getUserList() {
+        return userList;
     }
 
     //Button placement
@@ -179,8 +171,9 @@ public class Gui {
     }
 
     private void createFrame() {
-        getFrame().setBounds(0, 0, 1000, 750);
-        getFrame().setLayout(new FlowLayout());
+        getFrame().setBounds(0, 0, 200, 300);
+        getFrame().setLocationRelativeTo(null);
+        getFrame().setLayout(new BorderLayout());
         getFrame().getContentPane().setBackground(getFrameColor());
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().setVisible(true);
@@ -224,36 +217,26 @@ public class Gui {
         if (!isListPlayersScreenEnabled()) {
             logger.debug("instantiating all UI-Objects for ListPlayersResponse once");
 
-            getFrame().setLayout(new FlowLayout());
+            getFrame().setLayout(new BorderLayout());
 
-            //render refresh button
-            JButton refreshListButton = new JButton("Aktualisiere Liste");
-            refreshListButton.addActionListener(e -> {
-                ListUsersAction listUsersAction = new ListUsersAction(getUser());
-                Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listUsersAction, getOutputStream()));
-                socketWriter.start();
-                logger.debug("sending ListUsersAction");
-            });
-            refreshListButton.setPreferredSize(new Dimension(200, 50));
-            refreshListButton.setBackground(getButtonColor());
-            refreshListButton.setForeground(getButtonTextColor());
-            refreshListButton.setFocusPainted(false);
-            getFrame().add(refreshListButton);
+            getFrame().setBounds(0, 0, 200, 300);
+
+            getFrame().setLocationRelativeTo(null);
 
             //render player list
-            getUserList().setPreferredSize(new Dimension(300, 50));
-            getUserList().setEditable(true);
-            getUserList().getEditor().getEditorComponent().setBackground(getButtonColor());
-            getUserList().getEditor().getEditorComponent().setForeground(getButtonTextColor());
-            getFrame().add(getUserList());
+            JList<User> userJList = new JList<>(getUserList());
+            userJList.setPreferredSize(new Dimension(200, 50));
+            userJList.setBackground(getFrameColor());
+            userJList.setForeground(getButtonTextColor());
+            getFrame().add(userJList);
 
             //render connect button
             JButton connectButton = new JButton("Anfrage senden");
             connectButton.addActionListener(e -> {
-                if (getUserList().getSelectedItem() == null) {
+                if (userJList.getSelectedValue() == null) {
                     JOptionPane.showMessageDialog(getFrame(), "Bitte waehle einen Spieler aus der Liste aus!");
                 } else {
-                    ConnectAction connectAction = new ConnectAction(getUser(), (User) getUserList().getSelectedItem());
+                    ConnectAction connectAction = new ConnectAction(getUser(), userJList.getSelectedValue());
                     Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
                     socketWriter.start();
                     logger.debug("sending ConnectAction");
@@ -263,20 +246,20 @@ public class Gui {
             connectButton.setBackground(getButtonColor());
             connectButton.setForeground(getButtonTextColor());
             connectButton.setFocusPainted(false);
-            getFrame().add(connectButton);
+            getFrame().add(connectButton, BorderLayout.NORTH);
 
             setListPlayersScreenEnabled(true);
             setGameScreenEnabled(false);
         }
 
         //if Player Screen is already enabled refresh ComboBox
-        getUserList().removeAllItems();
+        getUserList().clear();
         if (response.getUsers().isEmpty()) {
             JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in spaeter zu aktualisieren.");
-            getUserList().addItem(null);
+            getUserList().addElement(null);
         } else {
             for (User user : response.getUsers()) {
-                getUserList().addItem(user);
+                getUserList().addElement(user);
             }
         }
     }
@@ -311,12 +294,11 @@ public class Gui {
     }
 
     public void initializeUIManager(){
-        UIManager UI = new UIManager();
-        UI.put("OptionPane.background", getButtonColor());
-        UI.put("OptionPane.messageForeground", getButtonTextColor());
-        UI.put("Panel.background", getButtonColor());
-        UI.put("Button.background", getFrameColor());
-        UI.put("Button.foreground", getButtonTextColor());
+        UIManager.put("OptionPane.background", getButtonColor());
+        UIManager.put("OptionPane.messageForeground", getButtonTextColor());
+        UIManager.put("Panel.background", getButtonColor());
+        UIManager.put("Button.background", getFrameColor());
+        UIManager.put("Button.foreground", getButtonTextColor());
     }
 
     public synchronized void readNameAndSendInitialAction() {
@@ -366,6 +348,10 @@ public class Gui {
             getFrame().getContentPane().removeAll();
 
             getFrame().setLayout(null);
+
+            getFrame().setBounds(0, 0, 1000, 750);
+
+            getFrame().setLocationRelativeTo(null);
 
             // create Buttons only possible, after GameResponse was received
 
@@ -475,5 +461,11 @@ public class Gui {
         }
     }
 }
-//todo maybe change color of popup menus
-//todo maybe change button initialization into function
+//todo set minimum length for passwords client-side/server-side?
+//todo maybe set maximum length for player names
+//todo scrollable JList?
+//todo server error, probably caused through logoff?
+//todo add some comments
+//todo find bug where other player gets no popup message when endgame Button has been pressed
+//todo server sending 2 responses after first player is connecting
+//todo EndGameResponse should send the User Object

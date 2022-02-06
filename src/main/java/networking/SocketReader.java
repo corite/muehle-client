@@ -35,7 +35,6 @@ public class SocketReader implements Runnable {
                     ObjectInputStream ois = new ObjectInputStream(getSocket().getInputStream());
 
                     Object inputObject = ois.readObject();
-                    //todo: implement connect action
                     if (inputObject instanceof RegisterLoginUserResponse) {
                         handleRegisterLoginUserResponse((RegisterLoginUserResponse) inputObject);
                     } else if (inputObject instanceof ListUsersResponse) {
