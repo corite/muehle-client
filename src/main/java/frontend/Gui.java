@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -171,7 +173,7 @@ public class Gui {
     }
 
     private void createFrame() {
-        getFrame().setBounds(0, 0, 200, 300);
+        getFrame().setBounds(0, 0, 300, 450);
         getFrame().setLocationRelativeTo(null);
         getFrame().setLayout(new BorderLayout());
         getFrame().getContentPane().setBackground(getFrameColor());
@@ -218,20 +220,37 @@ public class Gui {
             logger.debug("instantiating all UI-Objects for ListPlayersResponse once");
 
             getFrame().setLayout(new BorderLayout());
-
-            getFrame().setBounds(0, 0, 200, 300);
-
+            getFrame().setBounds(0, 0, 300, 450);
             getFrame().setLocationRelativeTo(null);
+            getFrame().setResizable(true);
+
+            JTextArea usernameAndWaitingUsers = new JTextArea("Du spielst als " + getUser() + ".\nListe der wartenden Spieler:");
+            usernameAndWaitingUsers.setBackground(getFrameColor());
+            usernameAndWaitingUsers.setForeground(getButtonTextColor());
+            getFrame().add(usernameAndWaitingUsers, BorderLayout.NORTH);
 
             //render player list
             JList<User> userJList = new JList<>(getUserList());
             userJList.setPreferredSize(new Dimension(200, 50));
+            userJList.addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    if (userJList.getSelectedValue() != null) {
+                        ConnectAction connectAction = new ConnectAction(getUser(), userJList.getSelectedValue());
+                        Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
+                        socketWriter.start();
+                        logger.debug("sending ConnectAction");
+
+                    }
+                }
+            });
             userJList.setBackground(getFrameColor());
             userJList.setForeground(getButtonTextColor());
-            getFrame().add(userJList);
+            JScrollPane scrollPane = new JScrollPane(userJList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            getFrame().add(scrollPane, BorderLayout.CENTER);
 
             //render connect button
-            JButton connectButton = new JButton("Anfrage senden");
+            /*JButton connectButton = new JButton("Anfrage senden");
             connectButton.addActionListener(e -> {
                 if (userJList.getSelectedValue() == null) {
                     JOptionPane.showMessageDialog(getFrame(), "Bitte waehle einen Spieler aus der Liste aus!");
@@ -247,6 +266,8 @@ public class Gui {
             connectButton.setForeground(getButtonTextColor());
             connectButton.setFocusPainted(false);
             getFrame().add(connectButton, BorderLayout.NORTH);
+*/
+            getFrame().getContentPane().revalidate();
 
             setListPlayersScreenEnabled(true);
             setGameScreenEnabled(false);
@@ -255,7 +276,7 @@ public class Gui {
         //if Player Screen is already enabled refresh ComboBox
         getUserList().clear();
         if (response.getUsers().isEmpty()) {
-            JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange versuche die Liste in spaeter zu aktualisieren.");
+            JOptionPane.showMessageDialog(getFrame(), "Zurzeit befindet sich kein Spieler in der Warteschlange.");
             getUserList().addElement(null);
         } else {
             for (User user : response.getUsers()) {
@@ -271,11 +292,6 @@ public class Gui {
         } else {
             setUser(response.getUser());
             getFrame().setTitle(getUser().getName() + " spielt Muehle");
-
-
-            ListUsersAction listPlayersAction = new ListUsersAction(response.getUser());
-            Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
-            socketWriter.start();
         }
     }
 
@@ -351,6 +367,8 @@ public class Gui {
 
             getFrame().setBounds(0, 0, 1000, 750);
 
+            getFrame().setResizable(false);
+
             getFrame().setLocationRelativeTo(null);
 
             // create Buttons only possible, after GameResponse was received
@@ -403,7 +421,7 @@ public class Gui {
     public synchronized void renderEndGameResponse(EndGameResponse response) {
         if (!isListPlayersScreenEnabled()) {
             logger.debug("rendering EndGameResponse");
-            if (!response.getMessage().contains(getUser().toString())) {
+            if (!response.getEndingUser().equals(getUser())) {
                 JOptionPane.showMessageDialog(getFrame(), response.getMessage());
             }
             getFrame().setTitle(getUser() + " spielt Muehle");
@@ -461,11 +479,6 @@ public class Gui {
         }
     }
 }
-//todo set minimum length for passwords client-side/server-side?
-//todo maybe set maximum length for player names
-//todo scrollable JList?
-//todo server error, probably caused through logoff?
 //todo add some comments
+//todo send connectAction when user is selected (not working if another user has been selected before, keeps being bugged until server restart)
 //todo find bug where other player gets no popup message when endgame Button has been pressed
-//todo server sending 2 responses after first player is connecting
-//todo EndGameResponse should send the User Object
