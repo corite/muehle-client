@@ -177,7 +177,7 @@ public class Gui {
         getFrame().getContentPane().setBackground(getFrameColor());
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().setVisible(true);
-        getFrame().setResizable(false);
+        getFrame().setResizable(true);
         initializeUIManager();
     }
 
@@ -343,8 +343,6 @@ public class Gui {
 
             getFrame().setBounds(0, 0, 1000, 750);
 
-            getFrame().setResizable(false);
-
             getFrame().setLocationRelativeTo(null);
 
             // create Buttons only possible, after GameResponse was received
@@ -363,8 +361,10 @@ public class Gui {
 
             placeEndGameButton();
 
+            getFrame().setResizable(false);
+
             getFrame().repaint();
-            getFrame().revalidate();
+            getFrame().getContentPane().revalidate();
             setGameScreenEnabled(true);
             setListPlayersScreenEnabled(false);
         } else {
