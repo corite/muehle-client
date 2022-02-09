@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -232,16 +230,12 @@ public class Gui {
             //render player list
             JList<User> userJList = new JList<>(getUserList());
             userJList.setPreferredSize(new Dimension(200, 50));
-            userJList.addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    if (userJList.getSelectedValue() != null) {
-                        ConnectAction connectAction = new ConnectAction(getUser(), userJList.getSelectedValue());
-                        Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
-                        socketWriter.start();
-                        logger.debug("sending ConnectAction");
-
-                    }
+            userJList.addListSelectionListener(e -> {
+                if (userJList.getSelectedValue() != null) {
+                    ConnectAction connectAction = new ConnectAction(getUser(), userJList.getSelectedValue());
+                    Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
+                    socketWriter.start();
+                    logger.debug("sending ConnectAction");
                 }
             });
             userJList.setBackground(getFrameColor());

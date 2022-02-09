@@ -79,6 +79,6 @@ public class SocketReader implements Runnable {
     }
 
     private void handleDisconnectResponse(DisconnectResponse response){
-        getGui().renderDisconnectResponse(response);
+    //    getGui().renderDisconnectResponse(response);
     }
 }
