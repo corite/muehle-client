@@ -249,24 +249,6 @@ public class Gui {
             JScrollPane scrollPane = new JScrollPane(userJList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             getFrame().add(scrollPane, BorderLayout.CENTER);
 
-            //render connect button
-            /*JButton connectButton = new JButton("Anfrage senden");
-            connectButton.addActionListener(e -> {
-                if (userJList.getSelectedValue() == null) {
-                    JOptionPane.showMessageDialog(getFrame(), "Bitte waehle einen Spieler aus der Liste aus!");
-                } else {
-                    ConnectAction connectAction = new ConnectAction(getUser(), userJList.getSelectedValue());
-                    Thread socketWriter = new Thread(new SocketWriter(getWriterLock(), connectAction, getOutputStream()));
-                    socketWriter.start();
-                    logger.debug("sending ConnectAction");
-                }
-            });
-            connectButton.setPreferredSize(new Dimension(200, 50));
-            connectButton.setBackground(getButtonColor());
-            connectButton.setForeground(getButtonTextColor());
-            connectButton.setFocusPainted(false);
-            getFrame().add(connectButton, BorderLayout.NORTH);
-*/
             getFrame().getContentPane().revalidate();
 
             setListPlayersScreenEnabled(true);
@@ -388,6 +370,7 @@ public class Gui {
             placeEndGameButton();
 
             getFrame().repaint();
+            getFrame().revalidate();
             setGameScreenEnabled(true);
             setListPlayersScreenEnabled(false);
         } else {

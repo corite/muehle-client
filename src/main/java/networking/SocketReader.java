@@ -31,7 +31,6 @@ public class SocketReader implements Runnable {
     public void run() {
         try {
             while (true) {
-                try {
                     ObjectInputStream ois = new ObjectInputStream(getSocket().getInputStream());
 
                     Object inputObject = ois.readObject();
@@ -46,10 +45,9 @@ public class SocketReader implements Runnable {
                     } else if (inputObject instanceof DisconnectResponse){
                         handleDisconnectResponse((DisconnectResponse) inputObject);
                     } else throw new ClassNotFoundException("Read input object not supported");
-                } catch (IOException e) {
-                    logger.error("the connection was closed", e);
-                }
             }
+        } catch (IOException e) {
+            logger.error("the connection was closed", e);
         } catch (ClassNotFoundException e) {
             logger.error("(de)serialization failed", e);
         } finally {
