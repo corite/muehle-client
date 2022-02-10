@@ -404,10 +404,10 @@ public class Gui {
             getFrame().setTitle(getUser() + " spielt Muehle");
             getFrame().getContentPane().removeAll();
             getFrame().repaint();
-            ListUsersAction listPlayersAction = new ListUsersAction(getUser());
-            Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
-            listPlayerWriter.start();
-            logger.debug("sending ListPlayersAction");
+//            ListUsersAction listPlayersAction = new ListUsersAction(getUser());
+//            Thread listPlayerWriter = new Thread(new SocketWriter(getWriterLock(), listPlayersAction, getOutputStream()));
+//            listPlayerWriter.start();
+//            logger.debug("sending ListPlayersAction");
         }
     }
 
